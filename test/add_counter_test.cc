@@ -8,8 +8,8 @@ BOOST_AUTO_TEST_SUITE(AddCounterTest)
 BOOST_AUTO_TEST_CASE( example1 )
 {
   NFA from;
-  const std::size_t bufferSize = 2;
-  NFAWithCounter to;
+  constexpr std::size_t bufferSize = 2;
+  NFAWithCounter<bufferSize> to;
 
   from.states.reserve(3);
 
@@ -30,9 +30,8 @@ BOOST_AUTO_TEST_CASE( example1 )
   from.states[1]->isMatch = false;
   from.states[2]->isMatch = true;
 
-  toNFAWithCounter(from, bufferSize, to);
+  toNFAWithCounter(from, to);
 
-  BOOST_CHECK_EQUAL(to.bufferSize, bufferSize);
   BOOST_REQUIRE_EQUAL(to.states.size(), 7);
   BOOST_REQUIRE_EQUAL(to.initStates.size(), 1);
 

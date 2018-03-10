@@ -2,14 +2,14 @@
 
 #include "automata.hh"
 
+template<int BufferSize>
 struct NFAWithCounter : public NFA {
   std::unordered_map<std::shared_ptr<NFAState>, std::size_t> counter;
-  std::size_t bufferSize;
 };
 
 // NFA -> Int -> NFAWithCounter
-void toNFAWithCounter(const NFA &from, const std::size_t bufferSize, NFAWithCounter &to) {
-  to.bufferSize = bufferSize;
+template<int BufferSize>
+void toNFAWithCounter(const NFA &from, NFAWithCounter<BufferSize> &to) {
   // S_{old} -> Int -> S_{new}
   boost::unordered_map<std::pair<std::shared_ptr<NFAState>, std::size_t>, std::shared_ptr<NFAState>> toNewState;
   std::vector<std::shared_ptr<NFAState>> currStates;
@@ -34,7 +34,7 @@ void toNFAWithCounter(const NFA &from, const std::size_t bufferSize, NFAWithCoun
 
     for (auto s: prevStates) {
       const std::size_t count = to.counter[s];
-      const std::size_t nextCount = (count == to.bufferSize) ? 1 : (count + 1);
+      const std::size_t nextCount = (count == BufferSize) ? 1 : (count + 1);
       auto oldNext = std::move(s->next);
       s->next.clear();
       for (auto nextPair: oldNext) {
