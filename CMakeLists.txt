@@ -43,7 +43,8 @@ enable_testing()
 
 add_executable(unit_test
           test/unit_test.cc
-          test/add_counter_test.cc)
+          test/add_counter_test.cc
+          test/bit_buffer_test.cc)
 
 target_link_libraries(unit_test
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
