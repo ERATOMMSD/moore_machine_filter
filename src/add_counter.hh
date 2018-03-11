@@ -10,6 +10,9 @@ struct AutomatonWithCounter : public Automaton<T> {
 template<int BufferSize>
 using NFAWithCounter = AutomatonWithCounter<NFAState, BufferSize>;
 
+template<int BufferSize>
+using TAWithCounter = AutomatonWithCounter<TAState, BufferSize>;
+
 // NFA -> Int -> NFAWithCounter
 template<class State, int BufferSize>
 void toAutomatonWithCounter(const Automaton<State> &from, AutomatonWithCounter<State, BufferSize> &to) {

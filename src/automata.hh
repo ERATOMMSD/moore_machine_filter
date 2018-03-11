@@ -2,6 +2,7 @@
 // (setq flycheck-clang-language-standard "c++11")
 #include <vector>
 #include <array>
+#include <valarray>
 #include <unordered_map>
 #include <boost/unordered_map.hpp>
 #include <unordered_set>
@@ -31,14 +32,17 @@ struct NonDeterministicAutomatonState : public AutomatonState {
 struct NFAState : public NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>> {
   using Transition = std::weak_ptr<NFAState>;
   using ParentState = NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>>;
-  NFAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
+  using ParentState::ParentState;
+  //  NFAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
 };
 
 struct TATransition;
 //! @brief A state of a timed automaton 
 struct TAState : public NonDeterministicAutomatonState<unsigned char, TATransition> {
+  using Transition = TATransition;
   using ParentState = NonDeterministicAutomatonState<unsigned char, TATransition>;
-  TAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<TATransition>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
+  using ParentState::ParentState;
+  //  TAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<TATransition>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
 };
 
 //! @brief A transition of a timed automaton
@@ -52,6 +56,9 @@ struct TATransition {
 
   void operator=(std::weak_ptr<TAState> p) {
     target = p;
+  }
+  std::shared_ptr<TAState> lock() {
+    return target.lock();
   }
 };
 
@@ -202,3 +209,89 @@ using NFA = Automaton<NFAState>;
 //       });
 //   }
 // };
+
+struct TimedAutomaton : public Automaton<TAState> {
+  using X = ConstraintMaker;
+  using State = ::TAState;
+
+  //! @brief The maximum constraints for each clock variables.
+  std::vector<int> maxConstraints;
+  /*!
+    @brief make a deep copy of this timed automaton.
+
+    @param [out] dest The destination of the deep copy.
+    @param [out] old2new The mapping from the original state to the corresponding new state.
+   */
+  void deepCopy(TimedAutomaton& dest, std::unordered_map<TAState*, std::shared_ptr<TAState>> &old2new) const {
+    // copy states
+    old2new.reserve(stateSize());
+    dest.states.reserve(stateSize());
+    for (auto oldState: states) {
+      dest.states.emplace_back(std::make_shared<TAState>(*oldState));
+      old2new[oldState.get()] = dest.states.back();
+    }
+    // copy initial states
+    dest.initialStates.reserve(initialStates.size());
+    for (auto oldInitialState: initialStates) {
+      dest.initialStates.emplace_back(old2new[oldInitialState.get()]);
+    }
+    // modify dest of transitions
+    for (auto &state: dest.states) {
+      for (auto &edges: state->nextMap) {
+        for (auto &edge: edges.second) {
+          auto oldTarget = edge.target.lock().get();
+          edge.target = old2new[oldTarget];
+        }
+      }
+
+    }
+    dest.maxConstraints = maxConstraints;
+  }
+  //! @brief Returns the number of clock variables used in the timed automaton.
+  inline size_t clockSize() const {return maxConstraints.size ();}
+
+  /*!
+    @brief solve membership problem for observable timed automaton
+    @note This is only for testing.
+    @note If there are epsilon transitions, this does not work.
+   */
+  bool isMember(const std::vector<std::pair<unsigned char, double>> &w) const {
+    std::vector<std::pair<TAState*, std::valarray<double>>> CStates;
+    CStates.reserve(initialStates.size());
+    for (const auto& s: initialStates) {
+      CStates.emplace_back(s.get(), std::valarray<double>(0.0, clockSize()));
+    }
+    for (std::size_t i = 0; i < w.size(); i++) {
+      std::vector<std::pair<TAState*, std::valarray<double>>> NextStates;
+      for (std::pair<TAState*, std::valarray<double>> &config: CStates) {
+        if (i > 0) {
+          config.second += w[i].second - w[i-1].second;
+        } else {
+          config.second += w[i].second;
+        }
+        auto it = config.first->nextMap.find(w[i].first);
+        if (it == config.first->nextMap.end()) {
+          continue;
+        }
+        for (const auto &edge: it->second) {
+          if (std::all_of(edge.guard.begin(), edge.guard.end(), [&](const Constraint &g) {
+                return g.satisfy(config.second[g.x]);
+              })) {
+            auto tmpConfig = config;
+            tmpConfig.first = edge.target.lock().get();
+            if (tmpConfig.first) {
+              for (ClockVariables x: edge.resetVars) {
+                tmpConfig.second[x] = 0; 
+              }
+              NextStates.emplace_back(std::move(tmpConfig));
+            }
+          }
+        }
+      }
+      CStates = std::move(NextStates);
+    }
+    return std::any_of(CStates.begin(), CStates.end(), [](std::pair<const TAState*, std::valarray<double>> p) {
+        return p.first->isMatch;
+      });
+  }
+};
