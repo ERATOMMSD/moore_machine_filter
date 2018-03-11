@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
 {
   constexpr std::size_t bufferSize = 2;
   NFAWithCounter<bufferSize> from;
-  MooreMachine<bufferSize> to;
+  MooreMachine<bufferSize, unsigned char, DFAState> to;
 
   from.states.reserve(4);
 
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( filter1 )
   constexpr std::size_t bufferSize = 2;
   NFA nfa;
   NFAWithCounter<bufferSize> nfaCounter;
-  MooreMachine<bufferSize> mooreFilter;
+  MooreMachine<bufferSize, unsigned char, DFAState> mooreFilter;
 
   nfa.states.reserve(4);
 
@@ -83,8 +83,9 @@ BOOST_AUTO_TEST_CASE( filter1 )
   toMooreMachine(nfaCounter, mooreFilter);
 
   constexpr int strSize = 7;
-  std::array<unsigned char, strSize> input = {{'a', 'c', 'd', 'd', 'a', maskChar, maskChar}};
-  std::array<unsigned char, strSize> output = {{maskChar, maskChar, maskChar, 'c', 'd', 'd', maskChar}};
+  const auto mc = maskChar<unsigned char>;
+  std::array<unsigned char, strSize> input = {{'a', 'c', 'd', 'd', 'a', mc, mc}};
+  std::array<unsigned char, strSize> output = {{mc, mc, mc, 'c', 'd', 'd', mc}};
 
   BOOST_TEST_REQUIRE(mooreFilter.currentState);
 

@@ -7,28 +7,46 @@
 #include "add_counter.hh"
 #include "bit_buffer.hh"
 
-const char maskChar = '_';
 
-template<int BufferSize>
-struct MooreMachine : public Automaton<DFAState> {
-  std::unordered_map<std::shared_ptr<DFAState>, std::size_t> counter;
-  std::queue<unsigned char> charBuffer;
+template<class T>
+constexpr const T maskChar;
+
+template<>
+constexpr const unsigned char maskChar<unsigned char> = '_';
+
+template<>
+constexpr const std::pair<unsigned char, double> maskChar<std::pair<unsigned char, double>> = {'_', 0};
+
+template<class T>
+T mask(T) {
+  return maskChar<T>;
+}
+
+template<>
+std::pair<unsigned char, double> mask(std::pair<unsigned char, double> c) {
+  return std::make_pair(maskChar<unsigned char>, c.second);
+}
+
+template<int BufferSize, class Alphabet, class State>
+struct MooreMachine : public Automaton<State> {
+  std::unordered_map<std::shared_ptr<State>, std::size_t> counter;
+  std::queue<Alphabet> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
   std::shared_ptr<DFAState> currentState;
   MooreMachine() {
     for (int i = 0; i < BufferSize; i++) {
-      charBuffer.push(maskChar);
+      charBuffer.push(maskChar<Alphabet>);
     }
   }
 
-  unsigned char feed(unsigned char c) {
+  Alphabet feed(Alphabet c) {
     currentState = currentState->next(c);
     if (!currentState) {
-      currentState = initialStates[0];
+      currentState = Automaton<State>::initialStates[0];
     }
-    const unsigned char ret = 
+    const Alphabet ret = 
       bitBuffer.getAndEnable(counter[currentState]) ? 
-      charBuffer.front() : maskChar;
+      charBuffer.front() : mask(charBuffer.front());
     charBuffer.pop();
     charBuffer.push(c);
 
@@ -38,7 +56,7 @@ struct MooreMachine : public Automaton<DFAState> {
 
 // NFAWithCounter -> MooreMachine
 template<int BufferSize>
-void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize> &to) {
+void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, unsigned char, DFAState> &to) {
   // S_{old} -> Int -> S_{new}
   boost::unordered_map<std::vector<std::shared_ptr<NFAState>>, std::shared_ptr<DFAState>> toNewState;
   boost::unordered_map<std::shared_ptr<DFAState>, std::vector<std::shared_ptr<NFAState>>> toOldStates;
