@@ -9,34 +9,49 @@
 // for debug
 #include <iostream>
 
+#include "constraint.hh"
+
+//! @brief A state of an automaton
 struct AutomatonState {
+  //! @brief The value is true if and only if the state is an accepting state.
   bool isMatch = false;
   AutomatonState () : isMatch(false) {}
   AutomatonState (bool isMatch) : isMatch(isMatch) {}
 };
 
-template<class Alphabet, class FinalState>
+//! @brief A state of a non-deterministic automaton
+template<class Alphabet, class Transition>
 struct NonDeterministicAutomatonState : public AutomatonState {
-  virtual void next(const Alphabet&, std::vector<std::shared_ptr<FinalState>>&) const = 0;
-  NonDeterministicAutomatonState () : AutomatonState(false) {}
-  NonDeterministicAutomatonState (bool isMatch) : AutomatonState(isMatch) {}
+  std::unordered_map<unsigned char, std::vector<Transition>> nextMap;
+  //  NonDeterministicAutomatonState (bool isMatch = false) : AutomatonState(isMatch) {}
+  NonDeterministicAutomatonState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<Transition>> nextMap = {}) : AutomatonState(isMatch), nextMap(std::move(nextMap)) {}
 };
 
-struct NFAState : public NonDeterministicAutomatonState<unsigned char, NFAState> {
-  using ParentState = NonDeterministicAutomatonState<unsigned char, NFAState>;
-  std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap;
-  NFAState () : ParentState(false), nextMap({}) {}
-  NFAState (bool isMatch) : ParentState(isMatch), nextMap({}) {}
-  NFAState (bool isMatch, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> next) : ParentState(isMatch), nextMap(next) {}
-  void next(const unsigned char& c, std::vector<std::shared_ptr<NFAState>>& vec) const {
-    vec.clear();
-    auto it = nextMap.find(c);
-    if (it != nextMap.end()) {
-      vec.reserve(it->second.size());
-      for (const auto &s: it->second) {
-        vec.push_back(s.lock());
-      }
-    }
+//! @brief A state of an NFA
+struct NFAState : public NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>> {
+  using Transition = std::weak_ptr<NFAState>;
+  using ParentState = NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>>;
+  NFAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
+};
+
+struct TATransition;
+//! @brief A state of a timed automaton 
+struct TAState : public NonDeterministicAutomatonState<unsigned char, TATransition> {
+  using ParentState = NonDeterministicAutomatonState<unsigned char, TATransition>;
+  TAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<TATransition>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
+};
+
+//! @brief A transition of a timed automaton
+struct TATransition {
+  //! @brief The pointer to the target state.
+  std::weak_ptr<TAState> target;
+  //! @brief The clock variables reset after this transition.
+  std::vector<ClockVariables> resetVars;
+  //! @brief The guard for this transition.
+  std::vector<Constraint> guard;
+
+  void operator=(std::weak_ptr<TAState> p) {
+    target = p;
   }
 };
 

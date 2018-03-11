@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( example1 )
   from.states[1]->isMatch = false;
   from.states[2]->isMatch = true;
 
-  toNFAWithCounter(from, to);
+  toAutomatonWithCounter(from, to);
 
   BOOST_REQUIRE_EQUAL(to.states.size(), 7);
   BOOST_REQUIRE_EQUAL(to.initialStates.size(), 1);

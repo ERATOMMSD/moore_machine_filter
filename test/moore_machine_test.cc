@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( filter1 )
 
   nfa.initialStates = {nfa.states[0]};
 
-  toNFAWithCounter(nfa, nfaCounter);
+  toAutomatonWithCounter(nfa, nfaCounter);
   toMooreMachine(nfaCounter, mooreFilter);
 
   constexpr int strSize = 7;
