@@ -65,15 +65,13 @@ struct TATransition {
 template<class Alphabet, class FinalState>
 struct DeterministicAutomatonState : public AutomatonState {
   virtual std::shared_ptr<FinalState> next(const Alphabet&) = 0;
-  DeterministicAutomatonState () : AutomatonState(false) {}
-  DeterministicAutomatonState (bool isMatch) : AutomatonState(isMatch) {}
+  DeterministicAutomatonState (bool isMatch = false) : AutomatonState(isMatch) {}
 };
 
 struct DFAState : public DeterministicAutomatonState<unsigned char, DFAState> {
   std::unordered_map<unsigned char, std::weak_ptr<DFAState>> nextMap;
-  DFAState () : DeterministicAutomatonState<unsigned char, DFAState>(false), nextMap({}) {}
-  DFAState (bool isMatch) : DeterministicAutomatonState<unsigned char, DFAState>(isMatch), nextMap({}) {}
-  DFAState (bool isMatch, std::unordered_map<unsigned char, std::weak_ptr<DFAState>> next) : DeterministicAutomatonState<unsigned char, DFAState>(isMatch), nextMap(std::move(next)) {}
+  DFAState (bool isMatch = false, std::unordered_map<unsigned char, std::weak_ptr<DFAState>> next = {}) : 
+    DeterministicAutomatonState<unsigned char, DFAState>(isMatch), nextMap(std::move(next)) {}
 
   std::shared_ptr<DFAState> next(const unsigned char& c) {
     auto it = nextMap.find(c);
@@ -81,6 +79,23 @@ struct DFAState : public DeterministicAutomatonState<unsigned char, DFAState> {
       return std::shared_ptr<DFAState>();
     } else {
       return it->second.lock();
+    }
+  }
+};
+
+//! @brief A state of a deterministic real-time automaton 
+struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState> {
+  using ParentState = DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState>;
+  boost::unordered_map<unsigned char, std::vector<TATransition>> nextMap;
+  DRTAState (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<TATransition>> next = {}) : 
+    ParentState(isMatch), nextMap(std::move(next)) {}
+
+  std::shared_ptr<DRTAState> next(const std::pair<unsigned char, double>& c) {
+    auto it = nextMap.find(c.first);
+    if (it == nextMap.end()) {
+      return std::shared_ptr<DRTAState>();
+    } else {
+      //return it->second.lock();
     }
   }
 };
