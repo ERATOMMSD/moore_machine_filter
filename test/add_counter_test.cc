@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( example1 )
 
   for (int i = 0; i < 3; i++) {
     from.states[i]->isMatch = match[i];
-    from.states[i]->next['a'] = {next_weak[i]};
+    from.states[i]->nextMap['a'] = {next_weak[i]};
   }
 
   from.initialStates = {from.states[0]};
@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE( example1 )
 
   for (int i = 0; i < 7; i++) {
     BOOST_CHECK_EQUAL(to.states.at(i)->isMatch, matchResult.at(i));
-    BOOST_CHECK_EQUAL(to.states.at(i)->next['a'].size(), 1);
-    BOOST_CHECK_EQUAL(to.states.at(i)->next['a'][0].lock(), next_weakResult.at(i).lock());
+    BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'].size(), 1);
+    BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].lock(), next_weakResult.at(i).lock());
     BOOST_CHECK_EQUAL(to.counter[to.states.at(i)], counterResult.at(i));
   }
 }

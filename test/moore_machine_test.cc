@@ -25,10 +25,10 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
     from.counter[from.states[i]] = 0;
   }
 
-  from.states[0]->next['a'] = {from.states[1], from.states[3]};
-  from.states[1]->next['b'] = {from.states[1], from.states[3]};
-  from.states[2]->next['a'] = {from.states[3]};
-  from.states[3]->next['a'] = {from.states[1], from.states[2]};
+  from.states[0]->nextMap['a'] = {from.states[1], from.states[3]};
+  from.states[1]->nextMap['b'] = {from.states[1], from.states[3]};
+  from.states[2]->nextMap['a'] = {from.states[3]};
+  from.states[3]->nextMap['a'] = {from.states[1], from.states[2]};
 
   from.initialStates = {from.states[0], from.states[1], from.states[2]};
   std::sort(from.initialStates.begin(), from.initialStates.end());
@@ -71,11 +71,11 @@ BOOST_AUTO_TEST_CASE( filter1 )
     nfa.states[i]->isMatch = match[i];
   }
 
-  nfa.states[0]->next['a'] = {nfa.states[1]};
-  nfa.states[0]->next['c'] = {nfa.states[2]};
-  nfa.states[1]->next['b'] = {nfa.states[3]};
-  nfa.states[2]->next['d'] = {nfa.states[3]};
-  nfa.states[3]->next['d'] = {nfa.states[3]};
+  nfa.states[0]->nextMap['a'] = {nfa.states[1]};
+  nfa.states[0]->nextMap['c'] = {nfa.states[2]};
+  nfa.states[1]->nextMap['b'] = {nfa.states[3]};
+  nfa.states[2]->nextMap['d'] = {nfa.states[3]};
+  nfa.states[3]->nextMap['d'] = {nfa.states[3]};
 
   nfa.initialStates = {nfa.states[0]};
 

@@ -2,10 +2,13 @@
 
 #include "automata.hh"
 
-template<int BufferSize>
-struct NFAWithCounter : public NFA {
-  std::unordered_map<std::shared_ptr<NFAState>, std::size_t> counter;
+template<class T, int BufferSize>
+struct AutomatonWithCounter : public Automaton<T> {
+  std::unordered_map<std::shared_ptr<T>, std::size_t> counter;
 };
+
+template<int BufferSize>
+using NFAWithCounter = AutomatonWithCounter<NFAState, BufferSize>;
 
 // NFA -> Int -> NFAWithCounter
 template<int BufferSize>
@@ -36,8 +39,9 @@ void toNFAWithCounter(const NFA &from, NFAWithCounter<BufferSize> &to) {
     for (auto s: prevStates) {
       const std::size_t count = to.counter[s];
       const std::size_t nextCount = (count == BufferSize) ? 1 : (count + 1);
-      auto oldNext = std::move(s->next);
-      s->next.clear();
+      // TODO: swap target
+      auto oldNext = std::move(s->nextMap);
+      s->nextMap.clear();
       for (auto nextPair: oldNext) {
         std::vector<std::weak_ptr<NFAState>> newTargets;
         newTargets.reserve(nextPair.second.size());
@@ -54,7 +58,7 @@ void toNFAWithCounter(const NFA &from, NFAWithCounter<BufferSize> &to) {
           }
         }
 
-        s->next[nextPair.first] = std::move(newTargets);
+        s->nextMap[nextPair.first] = std::move(newTargets);
       }
     }
   }

@@ -15,11 +15,29 @@ struct AutomatonState {
   AutomatonState (bool isMatch) : isMatch(isMatch) {}
 };
 
-struct NFAState : public AutomatonState {
-  std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> next;
-  NFAState () : AutomatonState(false), next({}) {}
-  NFAState (bool isMatch) : AutomatonState(isMatch), next({}) {}
-  NFAState (bool isMatch, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> next) : AutomatonState(isMatch), next(next) {}
+template<class Alphabet, class FinalState>
+struct NonDeterministicAutomatonState : public AutomatonState {
+  virtual void next(const Alphabet&, std::vector<std::shared_ptr<FinalState>>&) const = 0;
+  NonDeterministicAutomatonState () : AutomatonState(false) {}
+  NonDeterministicAutomatonState (bool isMatch) : AutomatonState(isMatch) {}
+};
+
+struct NFAState : public NonDeterministicAutomatonState<unsigned char, NFAState> {
+  using ParentState = NonDeterministicAutomatonState<unsigned char, NFAState>;
+  std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap;
+  NFAState () : ParentState(false), nextMap({}) {}
+  NFAState (bool isMatch) : ParentState(isMatch), nextMap({}) {}
+  NFAState (bool isMatch, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> next) : ParentState(isMatch), nextMap(next) {}
+  void next(const unsigned char& c, std::vector<std::shared_ptr<NFAState>>& vec) const {
+    vec.clear();
+    auto it = nextMap.find(c);
+    if (it != nextMap.end()) {
+      vec.reserve(it->second.size());
+      for (const auto &s: it->second) {
+        vec.push_back(s.lock());
+      }
+    }
+  }
 };
 
 template<class Alphabet, class FinalState>
@@ -129,7 +147,7 @@ struct tmpNFA {
     states.push_back(std::make_shared<NFAState>(false));
     states.push_back(std::make_shared<NFAState>(true));
     for (auto c : cs) {
-      states.front()->next.at(c) = { std::weak_ptr<NFAState>(states.back()) };
+      states.front()->nextMap[c] = { std::weak_ptr<NFAState>(states.back()) };
     }
     initStates = { states.front() };
   }

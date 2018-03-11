@@ -94,7 +94,7 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, u
       // merge the next unordered_map of each NFAState
       std::unordered_map<unsigned char, std::vector<std::shared_ptr<NFAState>>> mergedNext;
       for (auto vecs: toOldStates[s]) {
-        for (const auto &nextPair: vecs->next) {
+        for (const auto &nextPair: vecs->nextMap) {
           mergedNext[nextPair.first].reserve(mergedNext[nextPair.first].size() + nextPair.second.size());
           for (std::weak_ptr<NFAState> ws: nextPair.second) {
             mergedNext[nextPair.first].push_back(ws.lock());
