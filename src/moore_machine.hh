@@ -14,6 +14,20 @@ struct MooreMachine : public Automaton<DFAState> {
   std::unordered_map<std::shared_ptr<DFAState>, std::size_t> counter;
   std::queue<unsigned char> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
+  std::shared_ptr<DFAState> currentState;
+  unsigned char feed(unsigned char c) {
+    std::shared_ptr<DFAState> currentState = currentState->next(c);
+    if (!currentState) {
+      currentState = initialStates[0];
+    }
+    const unsigned char ret = 
+      bitBuffer.getAndEnable(counter[currentState]) ? 
+      charBuffer.front() : maskChar;
+    charBuffer.pop();
+    charBuffer.push(c);
+
+    return ret;
+  }
 };
 
 // NFAWithCounter -> MooreMachine
@@ -47,6 +61,7 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize> &
 
   // add initial state
   to.initialStates = {addNewState(from.initStates)};
+  to.currentState = to.initialStates[0];
 
   while (!currStates.empty()) {
     std::vector<std::shared_ptr<DFAState>> prevStates = std::move(currStates);
@@ -63,6 +78,7 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize> &
         }
       }
       for (auto &nextPair: mergedNext) {
+        nextPair.second.insert(nextPair.second.end(), from.initStates.begin(), from.initStates.end());
         std::sort(nextPair.second.begin(), nextPair.second.end());
         nextPair.second.erase(std::unique(nextPair.second.begin(), nextPair.second.end()), nextPair.second.end());
       }

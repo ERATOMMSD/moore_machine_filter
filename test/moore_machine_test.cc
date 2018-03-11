@@ -34,24 +34,21 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
 
   toMooreMachine(from, to);
 
-  BOOST_REQUIRE_EQUAL(to.states.size(), 4);
+  BOOST_REQUIRE_EQUAL(to.states.size(), 2);
   BOOST_REQUIRE_EQUAL(to.initialStates.size(), 1);
 
-  std::array<bool, 4> matchResult = {{true, false, true, false}};
-  std::array<std::size_t, 4> counterResult = {{0, 0, 0, 0}};
+  std::array<bool, 2> matchResult = {{true, true}};
+  std::array<std::size_t, 2> counterResult = {{0, 0}};
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 2; i++) {
     BOOST_CHECK_EQUAL(to.states.at(i)->isMatch, matchResult.at(i));
     BOOST_CHECK_EQUAL(to.counter[to.states.at(i)], counterResult.at(i));
   }
 
-  BOOST_CHECK_EQUAL(to.states.at(0)->next('a').lock(), to.states.at(1));
-  BOOST_CHECK_EQUAL(to.states.at(0)->next('b').lock(), to.states.at(1));
-  BOOST_CHECK_EQUAL(to.states.at(1)->next('a').lock(), to.states.at(2));
-  BOOST_CHECK_EQUAL(to.states.at(1)->next('b').lock(), to.states.at(1));
-  BOOST_CHECK_EQUAL(to.states.at(2)->next('a').lock(), to.states.at(3));
-  BOOST_CHECK_EQUAL(to.states.at(2)->next('b').lock(), to.states.at(1));
-  BOOST_CHECK_EQUAL(to.states.at(3)->next('a').lock(), to.states.at(2));
+  BOOST_CHECK_EQUAL(to.states.at(0)->next('a'), to.states.at(1));
+  BOOST_CHECK_EQUAL(to.states.at(0)->next('b'), to.states.at(1));
+  BOOST_CHECK_EQUAL(to.states.at(1)->next('a'), to.states.at(1));
+  BOOST_CHECK_EQUAL(to.states.at(1)->next('b'), to.states.at(1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

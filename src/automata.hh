@@ -24,7 +24,7 @@ struct NFAState : public AutomatonState {
 
 template<class Alphabet, class FinalState>
 struct DeterministicAutomatonState : public AutomatonState {
-  virtual std::weak_ptr<FinalState> next(const Alphabet&) = 0;
+  virtual std::shared_ptr<FinalState> next(const Alphabet&) = 0;
   DeterministicAutomatonState () : AutomatonState(false) {}
   DeterministicAutomatonState (bool isMatch) : AutomatonState(isMatch) {}
 };
@@ -35,8 +35,13 @@ struct DFAState : public DeterministicAutomatonState<unsigned char, DFAState> {
   DFAState (bool isMatch) : DeterministicAutomatonState<unsigned char, DFAState>(isMatch), nextMap({}) {}
   DFAState (bool isMatch, std::unordered_map<unsigned char, std::weak_ptr<DFAState>> next) : DeterministicAutomatonState<unsigned char, DFAState>(isMatch), nextMap(std::move(next)) {}
 
-  std::weak_ptr<DFAState> next(const unsigned char& c) {
-    return nextMap[c];
+  std::shared_ptr<DFAState> next(const unsigned char& c) {
+    auto it = nextMap.find(c);
+    if (it == nextMap.end()) {
+      return std::shared_ptr<DFAState>();
+    } else {
+      return it->second.lock();
+    }
   }
 };
 
