@@ -84,7 +84,7 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, u
   };
 
   // add initial state
-  to.initialStates = {addNewState(from.initStates)};
+  to.initialStates = {addNewState(from.initialStates)};
   to.currentState = to.initialStates[0];
 
   while (!currStates.empty()) {
@@ -102,7 +102,7 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, u
         }
       }
       for (auto &nextPair: mergedNext) {
-        nextPair.second.insert(nextPair.second.end(), from.initStates.begin(), from.initStates.end());
+        nextPair.second.insert(nextPair.second.end(), from.initialStates.begin(), from.initialStates.end());
         std::sort(nextPair.second.begin(), nextPair.second.end());
         nextPair.second.erase(std::unique(nextPair.second.begin(), nextPair.second.end()), nextPair.second.end());
       }

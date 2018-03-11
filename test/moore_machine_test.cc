@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
   from.states[2]->next['a'] = {from.states[3]};
   from.states[3]->next['a'] = {from.states[1], from.states[2]};
 
-  from.initStates = {from.states[0], from.states[1], from.states[2]};
-  std::sort(from.initStates.begin(), from.initStates.end());
+  from.initialStates = {from.states[0], from.states[1], from.states[2]};
+  std::sort(from.initialStates.begin(), from.initialStates.end());
 
   toMooreMachine(from, to);
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( filter1 )
   nfa.states[2]->next['d'] = {nfa.states[3]};
   nfa.states[3]->next['d'] = {nfa.states[3]};
 
-  nfa.initStates = {nfa.states[0]};
+  nfa.initialStates = {nfa.states[0]};
 
   toNFAWithCounter(nfa, nfaCounter);
   toMooreMachine(nfaCounter, mooreFilter);

@@ -135,35 +135,37 @@ struct tmpNFA {
   }
 };
 
-struct NFA {
-  std::vector<std::shared_ptr<NFAState>> states;
-  std::vector<std::shared_ptr<NFAState>> initStates;
-  NFA () {}
-  NFA (const std::vector<std::shared_ptr<NFAState>>& states, const std::vector<std::shared_ptr<NFAState>>& initStates) : states(std::move(states)), initStates(initStates) {}
-  NFA (tmpNFA& in) : states(in.states.begin(), in.states.end()), initStates(in.initStates.begin(), in.initStates.end()) { }
-  // boost::unordered_map<std::vector<std::shared_ptr<NFAState>>, DFAState*> toDFA;
+using NFA = Automaton<NFAState>;
 
-  // @note This function is only for debugging
-  bool isMatch(const std::string &str) {
-    std::vector<std::shared_ptr<NFAState>> currentConf = initStates;    
-    for (auto c: str) {
-      if (currentConf.empty()) {
-        return false;
-      }
-      std::vector<std::shared_ptr<NFAState>> nextConf;
-      for (auto conf: currentConf) {
-        std::vector<std::shared_ptr<NFAState>> tmpNext;
-        for (const std::weak_ptr<NFAState> ptr: conf->next.at(c)) {
-          if (!ptr.expired()) {
-            tmpNext.push_back(ptr.lock());
-          }
-        }
-        nextConf.insert(nextConf.end(), tmpNext.begin(), tmpNext.end());
-      }
-      currentConf = std::move(nextConf);
-    }
-    return std::any_of(currentConf.begin(), currentConf.end(), [](const std::shared_ptr<NFAState> s) {
-        return s->isMatch;
-      });
-  }
-};
+// struct NFA {
+//   std::vector<std::shared_ptr<NFAState>> states;
+//   std::vector<std::shared_ptr<NFAState>> initStates;
+//   NFA () {}
+//   NFA (const std::vector<std::shared_ptr<NFAState>>& states, const std::vector<std::shared_ptr<NFAState>>& initStates) : states(std::move(states)), initStates(initStates) {}
+//   NFA (tmpNFA& in) : states(in.states.begin(), in.states.end()), initStates(in.initStates.begin(), in.initStates.end()) { }
+//   // boost::unordered_map<std::vector<std::shared_ptr<NFAState>>, DFAState*> toDFA;
+
+//   // @note This function is only for debugging
+//   bool isMatch(const std::string &str) {
+//     std::vector<std::shared_ptr<NFAState>> currentConf = initStates;    
+//     for (auto c: str) {
+//       if (currentConf.empty()) {
+//         return false;
+//       }
+//       std::vector<std::shared_ptr<NFAState>> nextConf;
+//       for (auto conf: currentConf) {
+//         std::vector<std::shared_ptr<NFAState>> tmpNext;
+//         for (const std::weak_ptr<NFAState> ptr: conf->next.at(c)) {
+//           if (!ptr.expired()) {
+//             tmpNext.push_back(ptr.lock());
+//           }
+//         }
+//         nextConf.insert(nextConf.end(), tmpNext.begin(), tmpNext.end());
+//       }
+//       currentConf = std::move(nextConf);
+//     }
+//     return std::any_of(currentConf.begin(), currentConf.end(), [](const std::shared_ptr<NFAState> s) {
+//         return s->isMatch;
+//       });
+//   }
+// };

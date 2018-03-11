@@ -24,10 +24,10 @@ void toNFAWithCounter(const NFA &from, NFAWithCounter<BufferSize> &to) {
   };
 
   // add initial states
-  for (const auto &s: from.initStates) {
-    to.initStates.push_back(addNewState(s, 0));
+  for (const auto &s: from.initialStates) {
+    to.initialStates.push_back(addNewState(s, 0));
   }
-  std::sort(to.initStates.begin(), to.initStates.end());
+  std::sort(to.initialStates.begin(), to.initialStates.end());
 
   while (!currStates.empty()) {
     std::vector<std::shared_ptr<NFAState>> prevStates = std::move(currStates);

@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( example1 )
     from.states[i]->next['a'] = {next_weak[i]};
   }
 
-  from.initStates = {from.states[0]};
+  from.initialStates = {from.states[0]};
   from.states[0]->isMatch = false;
   from.states[1]->isMatch = false;
   from.states[2]->isMatch = true;
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( example1 )
   toNFAWithCounter(from, to);
 
   BOOST_REQUIRE_EQUAL(to.states.size(), 7);
-  BOOST_REQUIRE_EQUAL(to.initStates.size(), 1);
+  BOOST_REQUIRE_EQUAL(to.initialStates.size(), 1);
 
   std::array<bool, 7> matchResult = {{false, false, true, false, false, true, false}};
   std::array<std::weak_ptr<NFAState>, 7> next_weakResult = 
