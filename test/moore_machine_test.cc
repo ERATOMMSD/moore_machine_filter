@@ -2,6 +2,7 @@
 #include <boost/mpl/list.hpp>
 
 #include "../src/moore_machine.hh"
+#include "../src/add_counter.hh"
 
 BOOST_AUTO_TEST_SUITE(MooreMachineTest)
 
@@ -49,6 +50,47 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
   BOOST_CHECK_EQUAL(to.states.at(0)->next('b'), to.states.at(1));
   BOOST_CHECK_EQUAL(to.states.at(1)->next('a'), to.states.at(1));
   BOOST_CHECK_EQUAL(to.states.at(1)->next('b'), to.states.at(1));
+}
+
+BOOST_AUTO_TEST_CASE( filter1 )
+{
+  constexpr std::size_t bufferSize = 2;
+  NFA nfa;
+  NFAWithCounter<bufferSize> nfaCounter;
+  MooreMachine<bufferSize> mooreFilter;
+
+  nfa.states.reserve(4);
+
+  for (int i = 0; i < 4; i++) {
+    nfa.states.push_back(std::make_shared<NFAState>());
+  }
+
+  std::array<bool, 4> match = {{false, false, false, true}};
+
+  for (int i = 0; i < 4; i++) {
+    nfa.states[i]->isMatch = match[i];
+  }
+
+  nfa.states[0]->next['a'] = {nfa.states[1]};
+  nfa.states[0]->next['c'] = {nfa.states[2]};
+  nfa.states[1]->next['b'] = {nfa.states[3]};
+  nfa.states[2]->next['d'] = {nfa.states[3]};
+  nfa.states[3]->next['d'] = {nfa.states[3]};
+
+  nfa.initStates = {nfa.states[0]};
+
+  toNFAWithCounter(nfa, nfaCounter);
+  toMooreMachine(nfaCounter, mooreFilter);
+
+  constexpr int strSize = 7;
+  std::array<unsigned char, strSize> input = {{'a', 'c', 'd', 'd', 'a', maskChar, maskChar}};
+  std::array<unsigned char, strSize> output = {{maskChar, maskChar, maskChar, 'c', 'd', 'd', maskChar}};
+
+  BOOST_TEST_REQUIRE(mooreFilter.currentState);
+
+  for (int i = 0; i < strSize; i++) {
+    BOOST_CHECK_EQUAL(mooreFilter.feed(input[i]), output[i]);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

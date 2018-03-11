@@ -15,8 +15,14 @@ struct MooreMachine : public Automaton<DFAState> {
   std::queue<unsigned char> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
   std::shared_ptr<DFAState> currentState;
+  MooreMachine() {
+    for (int i = 0; i < BufferSize; i++) {
+      charBuffer.push(maskChar);
+    }
+  }
+
   unsigned char feed(unsigned char c) {
-    std::shared_ptr<DFAState> currentState = currentState->next(c);
+    currentState = currentState->next(c);
     if (!currentState) {
       currentState = initialStates[0];
     }
