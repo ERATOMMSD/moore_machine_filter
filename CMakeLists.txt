@@ -45,6 +45,7 @@ add_executable(unit_test
           test/unit_test.cc
           test/moore_machine_test.cc
           test/add_counter_test.cc
+          test/automata_test.cc
           test/bdm_test.cc
           test/bit_buffer_test.cc)
 

@@ -83,11 +83,38 @@ struct DFAState : public DeterministicAutomatonState<unsigned char, DFAState> {
   }
 };
 
+struct DRTAState;
+//! @brief A transition of a deterministic real-time automaton
+struct DRTATransition {
+  std::pair<double, bool> upperBound;
+  //! @brief The pointer to the target state.
+  std::weak_ptr<DRTAState> target;
+
+  void operator=(std::weak_ptr<DRTAState> p) {
+    target = p;
+  }
+  bool operator<=(double x) const {
+    return upperBound.first <= x;
+  }
+  bool operator<(double x) const {
+    return upperBound.first < x  || (upperBound.first == x && !upperBound.second);
+  }
+  bool operator>(double x) const {
+    return upperBound.first > x;
+  }
+  bool operator>=(double x) const {
+    return upperBound.first > x || (upperBound.first == x && upperBound.second);
+  }
+  std::shared_ptr<DRTAState> lock() {
+    return target.lock();
+  }
+};
+
 //! @brief A state of a deterministic real-time automaton 
 struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState> {
   using ParentState = DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState>;
-  boost::unordered_map<unsigned char, std::vector<TATransition>> nextMap;
-  DRTAState (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<TATransition>> next = {}) : 
+  boost::unordered_map<unsigned char, std::vector<DRTATransition>> nextMap;
+  DRTAState (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<DRTATransition>> next = {}) : 
     ParentState(isMatch), nextMap(std::move(next)) {}
 
   std::shared_ptr<DRTAState> next(const std::pair<unsigned char, double>& c) {
@@ -95,10 +122,12 @@ struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, d
     if (it == nextMap.end()) {
       return std::shared_ptr<DRTAState>();
     } else {
-      //return it->second.lock();
+      auto it2 = std::lower_bound(it->second.begin(), it->second.end(), c.second);
+      return it2->lock();
     }
   }
 };
+
 
 // struct DFAState {
 //   bool isMatch;
