@@ -7,8 +7,8 @@ set(CMAKE_CXX_FLAGS "-Wall -std=c++14 -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-flto -O3 -DRELEASE")
 
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
+# find_package(BISON REQUIRED)
+# find_package(FLEX REQUIRED)
 find_package(Boost REQUIRED COMPONENTS
   program_options unit_test_framework iostreams graph)
 find_package(Eigen3 REQUIRED)
@@ -45,6 +45,7 @@ add_executable(unit_test
           test/unit_test.cc
           test/moore_machine_test.cc
           test/add_counter_test.cc
+          test/bdm_test.cc
           test/bit_buffer_test.cc)
 
 target_link_libraries(unit_test
