@@ -2,7 +2,7 @@
 
 #include <queue>
 #include <numeric>
-
+// (setq flycheck-clang-language-standard "c++14")
 #include "automata.hh"
 #include "add_counter.hh"
 #include "bit_buffer.hh"
