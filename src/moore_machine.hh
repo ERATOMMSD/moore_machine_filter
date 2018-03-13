@@ -23,7 +23,7 @@ T mask(T) {
 }
 
 template<>
-std::pair<unsigned char, double> mask(std::pair<unsigned char, double> c) {
+inline std::pair<unsigned char, double> mask(std::pair<unsigned char, double> c) {
   return std::make_pair(maskChar<unsigned char>, c.second);
 }
 

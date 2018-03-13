@@ -1,5 +1,5 @@
 #pragma once
-// (setq flycheck-clang-language-standard "c++11")
+// (setq flycheck-clang-language-standard "c++14")
 #include <vector>
 #include <array>
 #include <valarray>
@@ -57,7 +57,7 @@ struct TATransition {
   void operator=(std::weak_ptr<TAState> p) {
     target = p;
   }
-  std::shared_ptr<TAState> lock() {
+  std::shared_ptr<TAState> lock() const {
     return target.lock();
   }
 };

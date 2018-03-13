@@ -1,5 +1,5 @@
 #pragma once
-
+// (setq flycheck-clang-language-standard "c++14")
 #include <cmath>
 #include <limits>
 #include <algorithm>
@@ -29,7 +29,7 @@ static inline std::ostream& operator << (std::ostream& os, const Bounds& b) {
 #include <eigen3/Eigen/Core>
 //! @TODO configure include directory for eigen
 
-struct BDM {
+struct DBM {
   using Tuple = std::tuple<std::vector<Bounds>,Bounds>;
   Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic> value;
   Bounds M;
@@ -38,8 +38,8 @@ struct BDM {
     return value.cols() - 1;
   }
 
-  inline void cutVars (std::shared_ptr<BDM> &out,std::size_t from,std::size_t to) {
-    out = std::make_shared<BDM>();
+  inline void cutVars (std::shared_ptr<DBM> &out,std::size_t from,std::size_t to) {
+    out = std::make_shared<DBM>();
     out->value.resize(to - from + 2, to - from + 2);
     out->value.block(0,0,1,1) << Bounds(0,true);
     out->value.block(1, 1, to - from + 1, to - from + 1) = value.block(from + 1, from + 1, to - from + 1,to - from + 1);
@@ -48,8 +48,8 @@ struct BDM {
     out->M = M;
   }
   
-  static BDM zero(int size) {
-    static BDM zeroZone;
+  static DBM zero(int size) {
+    static DBM zeroZone;
     if (zeroZone.value.cols() == size) {
       return zeroZone;
     }
@@ -123,23 +123,23 @@ struct BDM {
     value(0, 0) = Bounds(-std::numeric_limits<double>::infinity(), false);
   }
 
-  bool operator== (BDM z) const {
+  bool operator== (DBM z) const {
     z.value(0,0) = value(0,0);
     return value == z.value;
   }
 
-  void operator&=(const BDM &z) {
+  void operator&=(const DBM &z) {
     value.array() = value.array().min(z.value.array());
     canonize();
   }
 
   // find [lower, upper] = \{t \mid value + t \cap z \ne \emptyset\}
-  void findDuration(const BDM &z, Bounds &lower, Bounds &upper) {
+  void findDuration(const DBM &z, Bounds &lower, Bounds &upper) const {
 #ifdef DEBUG
     assert(z.value.cols() == value.cols());
     assert(z.value.rows() == value.rows());
 #endif
-    BDM v = BDM::zero(value.cols() + 1);
+    DBM v = DBM::zero(value.cols() + 1);
     Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic> &valueT = v.value;
     valueT << value, value.col(0), value.row(0), Bounds(0, true);
     valueT(valueT.cols() - 1, 0) = Bounds(std::numeric_limits<double>::infinity(), false);
@@ -161,7 +161,34 @@ struct BDM {
   }
 };
 
-// struct ZoneAutomaton : public AbstractionAutomaton<BDM> {
+/*!
+  @brief Construct DBM from a vector of constraints 
+
+  @note The size of the given DBM D must be set correctly.
+ */
+inline void constraintsToDBM (const std::vector<Constraint> &guard, DBM &D) {
+  D.value.fill(Bounds(std::numeric_limits<double>::infinity(), false));
+  D.value.diagonal().fill(Bounds(0, true));
+  D.value.row(0).fill(Bounds(0, true));
+  for (const auto &delta : guard) {
+    switch (delta.odr) {
+    case Constraint::Order::lt:
+      D.tighten(delta.x,-1,{delta.c, false});
+      break;
+    case Constraint::Order::le:
+      D.tighten(delta.x,-1,{delta.c, true});
+      break;
+    case Constraint::Order::gt:
+      D.tighten(-1,delta.x,{-delta.c, false});
+      break;
+    case Constraint::Order::ge:
+      D.tighten(-1,delta.x,{-delta.c, true});
+      break;
+    }
+  }
+}
+
+// struct ZoneAutomaton : public AbstractionAutomaton<DBM> {
 //   struct TAEdge {
 //     State source;
 //     State target;
@@ -171,11 +198,11 @@ struct BDM {
 //   };
 
 //   boost::unordered_map<std::tuple<State, State, Alphabet>, TAEdge> edgeMap;
-//   boost::unordered_map<std::pair<TAState, typename BDM::Tuple>, RAState> zones_in_za;
+//   boost::unordered_map<std::pair<TAState, typename DBM::Tuple>, RAState> zones_in_za;
 //   int numOfVariables;
 // };
 
-// static inline std::ostream& operator << (std::ostream& os, const BDM& z) {
+// static inline std::ostream& operator << (std::ostream& os, const DBM& z) {
 //   for (int i = 0; i < z.value.rows();i++) {
 //     for (int j = 0; j < z.value.cols();j++) {
 //       os << z.value(i,j);
