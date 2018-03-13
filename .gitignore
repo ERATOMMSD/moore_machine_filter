@@ -36,3 +36,8 @@
 
 # CMake
 build/
+
+# gtags
+GPATH
+GRTAGS
+GTAGS
