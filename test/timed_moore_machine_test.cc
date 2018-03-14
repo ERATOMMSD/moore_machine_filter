@@ -75,7 +75,7 @@ public:
   void test (const std::size_t expectedStates,
              const std::vector<std::size_t> &expectedStatesNums,
              const std::vector<Bounds> expectedBounds) {
-    std::vector<std::pair<std::shared_ptr<TAState>, DBM>> initConfs;
+    std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
     std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
 
     linearlizeNexts(nexts, initConfs, nextLineared);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( linearlizeNexts1 )
   }
 
 
-  std::vector<std::pair<std::shared_ptr<TAState>, DBM>> initConfs;
+  std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
   std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
 
   linearlizeNexts(nexts, initConfs, nextLineared);
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( linearlizeNexts3 )
   }
 
 
-  std::vector<std::pair<std::shared_ptr<TAState>, DBM>> initConfs;
+  std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
   std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
 
   linearlizeNexts(nexts, initConfs, nextLineared);

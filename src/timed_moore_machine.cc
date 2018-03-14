@@ -46,7 +46,7 @@ void constructNexts(const std::shared_ptr<DRTAState> &s,
 }
 
 void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> &nexts,
-                     const std::vector<std::pair<std::shared_ptr<TAState>, DBM>> &initConfs,
+                     const std::unordered_multimap<std::shared_ptr<TAState>, DBM> &initConfs,
                      std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> &nextLineared) 
 {
   boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nextsLower = nexts;
@@ -77,9 +77,15 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
       const Bounds addedBounds = std::get<2>(lowerVec.front());
       while (addedBounds == std::get<2>(lowerVec.front())) {
         const auto addedPair = std::make_pair(std::get<0>(lowerVec.front()), std::get<1>(lowerVec.front()));
-        if (std::find(initConfs.begin(), initConfs.end(), addedPair) == initConfs.end()) {
-          currentStates.emplace(std::move(addedPair));
+        auto its = initConfs.equal_range(std::get<0>(lowerVec.front()));
+        for (auto it = its.first; it != its.second;) {
+          if (it->second == std::get<1>(lowerVec.front())) {
+            return;
+          } else {
+            ++it;
+          }
         }
+        currentStates.emplace(std::move(addedPair));
         lowerVec.pop_front();
       }
     };
@@ -87,7 +93,17 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
       const Bounds removedBounds = std::get<3>(upperVec.front());
       while (removedBounds == std::get<3>(upperVec.front())) {
         std::pair<std::shared_ptr<TAState>, DBM> removedPair = {std::get<0>(upperVec.front()), std::get<1>(upperVec.front())};
-        if (std::find(initConfs.begin(), initConfs.end(), removedPair) == initConfs.end()) {
+        {
+          auto its = initConfs.equal_range(std::get<0>(upperVec.front()));
+          for (auto it = its.first; it != its.second;) {
+            if (it->second == std::get<1>(upperVec.front())) {
+              return;
+            } else {
+              ++it;
+            }
+          }
+        }
+        {
           auto its = currentStates.equal_range(std::get<0>(upperVec.front()));
           for (auto it = its.first; it != its.second;) {
             if (it->second == std::get<1>(upperVec.front())) {

@@ -32,7 +32,7 @@ struct MooreMachine : public Automaton<State> {
   std::unordered_map<std::shared_ptr<State>, std::size_t> counter;
   std::queue<Alphabet> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
-  std::shared_ptr<DFAState> currentState;
+  std::shared_ptr<State> currentState;
   MooreMachine() {
     for (int i = 0; i < BufferSize; i++) {
       charBuffer.push(maskChar<Alphabet>);
