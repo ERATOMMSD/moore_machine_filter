@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE( constructNexts1 )
     s = std::make_shared<TAState>();
   }
   states[0]->nextMap['a'] = {{states[1], {}, {TimedAutomaton::X(0) > 4, TimedAutomaton::X(0) < 6}},
-                             {states[2], {}, {TimedAutomaton::X(0) > 5, TimedAutomaton::X(0) < 7}},
+                             {states[2], {0}, {TimedAutomaton::X(0) > 5, TimedAutomaton::X(0) < 7}},
                              {states[3], {}, {TimedAutomaton::X(0) > 7, TimedAutomaton::X(0) < 8}}};
 
   DBM D = DBM::zero(2);
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE( constructNexts1 )
       D.resize(2, 2);
   }
   expectedDBMs[0] << Bounds{0, true}, Bounds{-4, false}, Bounds{6, false}, Bounds{0, true};
-  expectedDBMs[1] << Bounds{0, true}, Bounds{-5, false}, Bounds{7, false}, Bounds{0, true};
+  expectedDBMs[1] << Bounds{0, true}, Bounds{0, true}, Bounds{0, true}, Bounds{0, true};
   expectedDBMs[2] << Bounds{0, true}, Bounds{-7, false}, Bounds{8, false}, Bounds{0, true};
   std::array<Bounds, 3> expectedLowerBounds = {{Bounds{0, false}, Bounds{0, false}, Bounds{-2, false}}};
   std::array<Bounds, 3> expectedUpperBounds = {{Bounds{3, false}, Bounds{4, false}, Bounds{5, false}}};
