@@ -21,10 +21,12 @@ operator+= (Bounds &a, const Bounds b) {
   a.first += b.first;
   a.second = a.second && b.second;
 }
-static inline std::ostream& operator << (std::ostream& os, const Bounds& b) {
-  os << "(" << b.first << ", " << b.second << ")";
-  return os;
-}
+namespace std {
+  static inline std::ostream &operator<<(std::ostream &os, const Bounds &b) {
+    os << "(" << b.first << ", " << b.second << ")";
+    return os;
+  }
+};
 
 #include <eigen3/Eigen/Core>
 //! @TODO configure include directory for eigen

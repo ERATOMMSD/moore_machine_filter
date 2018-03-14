@@ -61,8 +61,11 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
   for (auto& n: nextsLower) {
     std::sort(n.second.begin(), n.second.end(), [](const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &x,
                                                    const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &y) {
-                return std::get<2>(x) < std::get<2>(y);
+                return std::get<2>(x) > std::get<2>(y);
               });
+    for (auto &l: n.second) {
+      std::get<2>(l).first = -std::get<2>(l).first;
+    }
   }
   for (auto& n: nextsUpper) {
     std::sort(n.second.begin(), n.second.end(), [](const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &x,
@@ -77,41 +80,64 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
 
     std::unordered_multimap<std::shared_ptr<TAState>, DBM> currentStates = {initConfs.begin(), initConfs.end()};
     const auto useLowerFront = [&]() {
-      const auto addedPair = std::make_pair(std::get<0>(lowerVec.front()), std::get<1>(lowerVec.front()));
-      if (std::find(initConfs.begin(), initConfs.end(), addedPair) != initConfs.end()) {
-        currentStates.emplace(std::move(addedPair));
+      const Bounds addedBounds = std::get<2>(lowerVec.front());
+      while (addedBounds == std::get<2>(lowerVec.front())) {
+        const auto addedPair = std::make_pair(std::get<0>(lowerVec.front()), std::get<1>(lowerVec.front()));
+        if (std::find(initConfs.begin(), initConfs.end(), addedPair) == initConfs.end()) {
+          currentStates.emplace(std::move(addedPair));
+        }
+        lowerVec.pop_front();
       }
-      lowerVec.pop_front();
     };
     const auto useUpperFront = [&]() {
-      std::pair<std::shared_ptr<TAState>, DBM> removedPair = {std::get<0>(upperVec.front()), std::get<1>(upperVec.front())};
-      if (std::find(initConfs.begin(), initConfs.end(), removedPair) != initConfs.end()) {
-        auto its = currentStates.equal_range(std::get<0>(upperVec.front()));
-        for (auto it = its.first; it != its.second;) {
-          if (it->second == std::get<1>(upperVec.front())) {
-            it = currentStates.erase(it);
-            break;
-          } else {
-            ++it;
+      const Bounds removedBounds = std::get<3>(upperVec.front());
+      while (removedBounds == std::get<3>(upperVec.front())) {
+        std::pair<std::shared_ptr<TAState>, DBM> removedPair = {std::get<0>(upperVec.front()), std::get<1>(upperVec.front())};
+        if (std::find(initConfs.begin(), initConfs.end(), removedPair) == initConfs.end()) {
+          auto its = currentStates.equal_range(std::get<0>(upperVec.front()));
+          for (auto it = its.first; it != its.second;) {
+            if (it->second == std::get<1>(upperVec.front())) {
+              it = currentStates.erase(it);
+              break;
+            } else {
+              ++it;
+            }
           }
         }
+        upperVec.pop_front();
       }
-      upperVec.pop_front();
     };
-    while (std::get<2>(lowerVec.front()) <= Bounds{0, true}) {
+    while (!lowerVec.empty() && std::get<2>(lowerVec.front()) <= Bounds{0, true}) {
       useLowerFront();
     }
     while (!lowerVec.empty()) {
-      if (std::get<2>(lowerVec.front()) < std::get<3>(upperVec.front())) {
-        nextLineared[c].emplace_back(currentStates, std::get<2>(lowerVec.front()));
+      if (std::get<2>(lowerVec.front()).first < std::get<3>(upperVec.front()).first) {
+        auto b = std::get<2>(lowerVec.front());
+        b.second = !b.second;
+        nextLineared[c].emplace_back(currentStates, b);
         useLowerFront();
-      } else if (std::get<2>(lowerVec.front()) > std::get<3>(upperVec.front())) {
+      } else if (std::get<2>(lowerVec.front()).first > std::get<3>(upperVec.front()).first) {
         nextLineared[c].emplace_back(currentStates, std::get<3>(upperVec.front()));
         useUpperFront();
-      } else if (std::get<2>(lowerVec.front()) == std::get<3>(upperVec.front())) {
-        nextLineared[c].emplace_back(currentStates, std::get<2>(lowerVec.front()));
-        useLowerFront();
+      } else if (std::get<2>(lowerVec.front()).second != std::get<3>(upperVec.front()).second) {
+        nextLineared[c].emplace_back(currentStates, std::get<3>(upperVec.front()));
         useUpperFront();
+        useLowerFront();
+      } else if (std::get<2>(lowerVec.front()) == std::get<3>(upperVec.front())) {
+        Bounds open = std::get<2>(lowerVec.front());
+        open.second = false;
+        Bounds closed = std::get<2>(lowerVec.front());
+        closed.second = true;
+        nextLineared[c].emplace_back(currentStates, open);
+        if (std::get<2>(lowerVec.front()).second) {
+          useLowerFront();
+          nextLineared[c].emplace_back(currentStates, closed);
+          useUpperFront();
+        } else {
+          useUpperFront();
+          nextLineared[c].emplace_back(currentStates, closed);
+          useLowerFront();
+        }
       }
     }
 

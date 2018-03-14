@@ -51,40 +51,194 @@ BOOST_AUTO_TEST_CASE( constructNexts1 )
   }
 }
 
+class LinearlizeNexts {
+public:
+  LinearlizeNexts(){}
+  void construct(const std::size_t stateSize, 
+                 const std::vector<Bounds> &lowerBounds, 
+                 const std::vector<Bounds> &upperBounds) {
+    states.resize(stateSize);
+    for(auto &s: states) {
+      s = std::make_shared<TAState>();
+    }
+    DBMs.resize(stateSize-1);
+    for (auto &D: DBMs) {
+      D.resize(2, 2);
+    }
+    nexts['a'].reserve(stateSize-1);
+    for (std::size_t i = 0; i < stateSize-1; i++) {
+      DBM D = DBM::zero(2);
+      D.value = DBMs[i];
+      nexts['a'].emplace_back(states.at(i+1), D, lowerBounds.at(i), upperBounds.at(i));
+    }
+  }
+  void test (const std::size_t expectedStates,
+             const std::vector<std::size_t> &expectedStatesNums,
+             const std::vector<Bounds> expectedBounds) {
+    std::vector<std::pair<std::shared_ptr<TAState>, DBM>> initConfs;
+    std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
+
+    linearlizeNexts(nexts, initConfs, nextLineared);
+  
+    BOOST_CHECK_EQUAL(nextLineared['a'].size(), expectedStates);
+    for (std::size_t i = 0; i < expectedStates; i++) {
+      BOOST_CHECK_EQUAL(nextLineared['a'][i].first.size(), expectedStatesNums[i]);
+      BOOST_CHECK_EQUAL(nextLineared['a'][i].second, expectedBounds[i]);
+    }
+  }
+  std::vector<std::shared_ptr<TAState>> states;  
+  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  std::vector<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>> DBMs;
+};
+
 BOOST_AUTO_TEST_CASE( linearlizeNexts1 )
 {
-//   std::array<std::shared_ptr<TAState>, 4> states;
-//   for(auto &s: states) {
-//     s = std::make_shared<TAState>();
-//   }
-//   states[0]->nextMap['a'] = {{states[1], {}, {TimedAutomaton::X(0) > 4, TimedAutomaton::X(0) < 6}},
-//                              {states[2], {}, {TimedAutomaton::X(0) > 5, TimedAutomaton::X(0) < 7}},
-//                              {states[3], {}, {TimedAutomaton::X(0) > 7, TimedAutomaton::X(0) < 8}}};
+  std::array<std::shared_ptr<TAState>, 4> states;
+  for(auto &s: states) {
+    s = std::make_shared<TAState>();
+  }
 
-//   DBM D = DBM::zero(2);
-//   D.value.fill(Bounds(std::numeric_limits<double>::infinity(), false));
-//   D.value.diagonal().fill(Bounds(0, true));
-//   D.value.row(0).fill(Bounds(0, true));
-//   D.value(1, 0) = Bounds{5, false};
-//   D.value(0, 1) = Bounds{-3, false};
+  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  std::array<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>, 3> DBMs;
+  for (auto &D: DBMs) {
+    D.resize(2, 2);
+  }
+  DBMs[0] << Bounds{0, true}, Bounds{-4, false}, Bounds{6, false}, Bounds{0, true};
+  DBMs[1] << Bounds{0, true}, Bounds{0, true}, Bounds{0, true}, Bounds{0, true};
+  DBMs[2] << Bounds{0, true}, Bounds{-7, false}, Bounds{8, false}, Bounds{0, true};
+  std::array<Bounds, 3> lowerBounds = {{Bounds{0, false}, Bounds{0, false}, Bounds{-2, false}}};
+  std::array<Bounds, 3> upperBounds = {{Bounds{3, false}, Bounds{4, false}, Bounds{5, false}}};
 
-//   std::shared_ptr<DRTAState> s = std::make_shared<DRTAState>();
-//   std::unordered_map<std::shared_ptr<DRTAState>, std::unordered_multimap<std::shared_ptr<TAState>, DBM>> toOldStates;
-//   toOldStates[s].emplace(std::make_pair(states[0], D));
-//   boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  nexts['a'].reserve(3);
+  for (int i = 0; i < 3; i++) {
+    DBM D = DBM::zero(2);
+    D.value = DBMs[i];
+    nexts['a'].emplace_back(states.at(i+1), D, lowerBounds.at(i), upperBounds.at(i));
+  }
 
-//   constructNexts(s, toOldStates, nexts);
 
-//   BOOST_REQUIRE_EQUAL(nexts['a'].size(), 3);
-//   std::array<std::shared_ptr<TAState>, 3> expectedStates = {{states[1], states[2], states[3]}};
-//   std::array<Bounds, 3> expectedLowerBounds = {{Bounds{0, false}, Bounds{0, false}, Bounds{-2, false}}};
-//   std::array<Bounds, 3> expectedUpperBounds = {{Bounds{3, false}, Bounds{4, false}, Bounds{5, false}}};
+  std::vector<std::pair<std::shared_ptr<TAState>, DBM>> initConfs;
+  std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
 
-//   for (int i = 0; i < 3; i++) {
-//     BOOST_CHECK_EQUAL(std::get<0>(nexts['a'][i]), expectedStates[i]);
-//     BOOST_TEST((std::get<2>(nexts['a'][i]) == expectedLowerBounds[i]));
-//     BOOST_TEST((std::get<3>(nexts['a'][i]) == expectedUpperBounds[i]));
-//   }
+  linearlizeNexts(nexts, initConfs, nextLineared);
+  
+  // NOTE: the size of states is not 5 but 4 because we prohibit t = 0.
+  BOOST_CHECK_EQUAL(nextLineared['a'].size(), 4);
+  std::array<std::size_t, 4> expectedStatesNums = {{2, 3, 2, 1}};
+  std::array<Bounds, 4> expectedBounds = {{Bounds{2, true}, Bounds{3, false}, Bounds{4, false}, Bounds{5, false}}};
+  for (int i = 0; i < 4; i++) {
+    BOOST_CHECK_EQUAL(nextLineared['a'][i].first.size(), expectedStatesNums[i]);
+    BOOST_CHECK_EQUAL(nextLineared['a'][i].second, expectedBounds[i]);
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE( linearlizeNexts2, LinearlizeNexts )
+{
+  std::vector<Bounds> lowerBounds = {Bounds{-0, false}, Bounds{-2, false}, Bounds{-3, false}};
+  std::vector<Bounds> upperBounds = {Bounds{1, false}, Bounds{3, false}, Bounds{4, false}};
+  construct(4, lowerBounds, upperBounds);
+
+  constexpr const std::size_t expectedNextStates = 5;
+  std::vector<std::size_t> expectedStatesNums = {1, 0, 1, 0, 1};
+  std::vector<Bounds> expectedBounds = {Bounds{1, false}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}};
+
+  test(expectedNextStates, expectedStatesNums, expectedBounds);
+}
+
+BOOST_AUTO_TEST_CASE( linearlizeNexts3 )
+{
+  std::array<std::shared_ptr<TAState>, 5> states;
+  for(auto &s: states) {
+    s = std::make_shared<TAState>();
+  }
+
+  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  constexpr const std::size_t targetSize = 4;
+  std::array<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>, targetSize> DBMs;
+  for (auto &D: DBMs) {
+    D.resize(2, 2);
+  }
+  std::array<Bounds, targetSize> lowerBounds = {{Bounds{-0, false}, Bounds{-0, false}, Bounds{-2, true}, Bounds{-3, true}}};
+  std::array<Bounds, targetSize> upperBounds = {{Bounds{1, true}, Bounds{3, true}, Bounds{3, true}, Bounds{4, true}}};
+
+  constexpr const std::size_t expectedNextStates = 5;
+  std::array<std::size_t, expectedNextStates> expectedStatesNums = {{2, 1, 2, 3, 1}};
+  std::array<Bounds, expectedNextStates> expectedBounds = {{Bounds{1, true}, Bounds{2, false}, Bounds{3, false}, Bounds{3, true}, Bounds{4, true}}};
+
+  nexts['a'].reserve(targetSize);
+  for (std::size_t i = 0; i < targetSize; i++) {
+    DBM D = DBM::zero(2);
+    D.value = DBMs[i];
+    nexts['a'].emplace_back(states.at(i+1), D, lowerBounds.at(i), upperBounds.at(i));
+  }
+
+
+  std::vector<std::pair<std::shared_ptr<TAState>, DBM>> initConfs;
+  std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
+
+  linearlizeNexts(nexts, initConfs, nextLineared);
+  
+  BOOST_CHECK_EQUAL(nextLineared['a'].size(), expectedNextStates);
+  for (std::size_t i = 0; i < expectedNextStates; i++) {
+    BOOST_CHECK_EQUAL(nextLineared['a'][i].first.size(), expectedStatesNums[i]);
+    BOOST_CHECK_EQUAL(nextLineared['a'][i].second, expectedBounds[i]);
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE( linearlizeNextsUpperOpenAndClosed, LinearlizeNexts )
+{
+  std::vector<Bounds> lowerBounds = {{Bounds{-2, false}, Bounds{-3, false}}};
+  std::vector<Bounds> upperBounds = {{Bounds{5, true}, Bounds{5, false}}};
+  construct(3, lowerBounds, upperBounds);
+
+  constexpr const std::size_t expectedNextStates = 4;
+  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 1}};
+  std::vector<Bounds> expectedBounds = {{Bounds{2, true}, Bounds{3, true}, Bounds{5, false}, Bounds{5, true}}};
+
+  test(expectedNextStates, expectedStatesNums, expectedBounds);
+}
+
+BOOST_FIXTURE_TEST_CASE( linearlizeNextsUpperOpenAndOpen, LinearlizeNexts )
+{
+  std::vector<Bounds> lowerBounds = {{Bounds{-2, false}, Bounds{-3, false}}};
+  std::vector<Bounds> upperBounds = {{Bounds{5, false}, Bounds{5, false}}};
+  construct(3, lowerBounds, upperBounds);
+
+  constexpr const std::size_t expectedNextStates = 3;
+  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2}};
+  std::vector<Bounds> expectedBounds = {{Bounds{2, true}, Bounds{3, true}, Bounds{5, false}}};
+
+  test(expectedNextStates, expectedStatesNums, expectedBounds);
+}
+
+BOOST_FIXTURE_TEST_CASE( linearlizeNextsLowerOpenAndClosed, LinearlizeNexts )
+{
+  std::vector<Bounds> lowerBounds = {{Bounds{-2, true}, Bounds{-2, false}}};
+  std::vector<Bounds> upperBounds = {{Bounds{5, true}, Bounds{4, false}}};
+  construct(3, lowerBounds, upperBounds);
+
+  constexpr const std::size_t expectedNextStates = 4;
+  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 1}};
+  std::vector<Bounds> expectedBounds = {{Bounds{2, false}, Bounds{2, true}, Bounds{4, false}, Bounds{5, true}}};
+
+  test(expectedNextStates, expectedStatesNums, expectedBounds);
+}
+
+BOOST_FIXTURE_TEST_CASE( linearlizeNextsEverythingAt3, LinearlizeNexts )
+{
+  /*
+    Input Bounds
+    (1,3), (2,3], (3,5), [3,4)
+   */
+  std::vector<Bounds> lowerBounds = {Bounds{-1, false}, Bounds{-2, false}, Bounds{-3, false}, Bounds{-3, true}};
+  std::vector<Bounds> upperBounds = {Bounds{3, false}, Bounds{3, true}, Bounds{5, false}, Bounds{4, false}};
+  construct(5, lowerBounds, upperBounds);
+
+  constexpr const std::size_t expectedNextStates = 6;
+  std::vector<std::size_t> expectedStatesNums = {0, 1, 2, 2, 2, 1};
+  std::vector<Bounds> expectedBounds = {Bounds{1, true}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}, Bounds{5, false}};
+
+  test(expectedNextStates, expectedStatesNums, expectedBounds);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
