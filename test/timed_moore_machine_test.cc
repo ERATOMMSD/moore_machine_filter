@@ -32,11 +32,20 @@ BOOST_AUTO_TEST_CASE( constructNexts1 )
 
   BOOST_REQUIRE_EQUAL(nexts['a'].size(), 3);
   std::array<std::shared_ptr<TAState>, 3> expectedStates = {{states[1], states[2], states[3]}};
+  std::array<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>, 3> expectedDBMs;
+  for (auto &D: expectedDBMs) {
+      D.resize(2, 2);
+  }
+  expectedDBMs[0] << Bounds{0, true}, Bounds{-4, false}, Bounds{6, false}, Bounds{0, true};
+  expectedDBMs[1] << Bounds{0, true}, Bounds{-5, false}, Bounds{7, false}, Bounds{0, true};
+  expectedDBMs[2] << Bounds{0, true}, Bounds{-7, false}, Bounds{8, false}, Bounds{0, true};
   std::array<Bounds, 3> expectedLowerBounds = {{Bounds{0, false}, Bounds{0, false}, Bounds{-2, false}}};
   std::array<Bounds, 3> expectedUpperBounds = {{Bounds{3, false}, Bounds{4, false}, Bounds{5, false}}};
 
   for (int i = 0; i < 3; i++) {
+    std::get<1>(nexts['a'][i]).value.diagonal().fill(Bounds{0, true});
     BOOST_CHECK_EQUAL(std::get<0>(nexts['a'][i]), expectedStates[i]);
+    BOOST_TEST((std::get<1>(nexts['a'][i]).value == expectedDBMs[i]));
     BOOST_TEST((std::get<2>(nexts['a'][i]) == expectedLowerBounds[i]));
     BOOST_TEST((std::get<3>(nexts['a'][i]) == expectedUpperBounds[i]));
   }

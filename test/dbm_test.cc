@@ -4,7 +4,7 @@
 #include "../src/dbm.hh"
 #include "../src/automata.hh"
 
-BOOST_AUTO_TEST_SUITE(BDMTest)
+BOOST_AUTO_TEST_SUITE(DBMTest)
 
 BOOST_AUTO_TEST_CASE( findDurationTest )
 {
