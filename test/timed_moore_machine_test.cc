@@ -4,7 +4,7 @@
 #include "../src/timed_moore_machine.hh"
 #include "../src/add_counter.hh"
 
-BOOST_AUTO_TEST_SUITE(MooreMachineTest)
+BOOST_AUTO_TEST_SUITE(TimedMooreMachineTest)
 
 BOOST_AUTO_TEST_CASE( constructNexts1 )
 {
@@ -239,6 +239,65 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNextsEverythingAt3, LinearlizeNexts )
   std::vector<Bounds> expectedBounds = {Bounds{1, true}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}, Bounds{5, false}};
 
   test(expectedNextStates, expectedStatesNums, expectedBounds);
+}
+
+BOOST_AUTO_TEST_CASE(filterTest)
+{
+  using Alphabet = std::pair<unsigned char, double>;
+
+  TimedAutomaton from;
+  constexpr std::size_t bufferSize = 2;
+  TAWithCounter<bufferSize> to;
+  MooreMachine<bufferSize, Alphabet, DRTAState> filter;
+
+  from.states.reserve(3);
+
+  for (int i = 0; i < 3; i++) {
+    from.states.push_back(std::make_shared<TAState>());
+  }
+
+  std::array<bool, 3> match = {{false, false, true}};
+  std::array<std::weak_ptr<TAState>, 2> next_weak = {{from.states[1], from.states[2]}};
+  std::array<std::vector<ClockVariables>, 2> next_reset = {{{}, {}}};
+  std::array<std::vector<Constraint>, 2> next_guard = {{{TimedAutomaton::X(0) < 1}, {TimedAutomaton::X(0) < 1}}};
+
+  for (int i = 0; i < 2; i++) {
+    from.states[i]->isMatch = match[i];
+    from.states[i]->nextMap['a'] = {{next_weak[i], next_reset[i], next_guard[i]}};
+  }
+  from.states[2]->isMatch = match[2];
+
+  from.initialStates = {from.states[0]};
+  from.states[0]->isMatch = false;
+  from.states[1]->isMatch = false;
+  from.states[2]->isMatch = true;
+
+  from.maxConstraints = {1};
+
+  toAutomatonWithCounter(from, to);
+  toTimedMooreMachine(to, Bounds{1, true}, 1, filter);
+
+  std::vector<Alphabet> inputTimedWord = {{'a', 0.2},
+                                          {'b', 0.6},
+                                          {'a', 0.1},
+                                          {'b', 1.2},
+                                          {'a', 0.7},
+                                          maskChar<Alphabet>,
+                                          maskChar<Alphabet>};
+  
+  std::vector<Alphabet> outputTimedWord;
+  std::vector<Alphabet> outputTimedWordExpected = {maskChar<Alphabet>,
+                                                   maskChar<Alphabet>,
+                                                   {'a', 0.2},
+                                                   {'b', 0.6},
+                                                   maskChar<Alphabet>,
+                                                   maskChar<Alphabet>,
+                                                   maskChar<Alphabet>};
+  for (const auto &c: inputTimedWord) {
+    outputTimedWord.push_back(filter.feed(c));
+  }
+  BOOST_CHECK_EQUAL_COLLECTIONS(outputTimedWord.begin(), outputTimedWord.end(),
+                                outputTimedWordExpected.begin(), outputTimedWordExpected.end());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

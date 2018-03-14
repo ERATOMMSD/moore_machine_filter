@@ -100,9 +100,10 @@ BOOST_AUTO_TEST_CASE( TAAddCounter )
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'].size(), 1);
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].target.lock(), next_weakResult.at(i).lock());
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].resetVars.size(), next_resetResult.at(i).size());
-    BOOST_TEST(std::equal(to.states.at(i)->nextMap['a'][0].resetVars.begin(),
-                          to.states.at(i)->nextMap['a'][0].resetVars.end(),
-                          next_resetResult.at(i).begin()));
+    BOOST_CHECK_EQUAL_COLLECTIONS(to.states.at(i)->nextMap['a'][0].resetVars.begin(),
+                                  to.states.at(i)->nextMap['a'][0].resetVars.end(),
+                                  next_resetResult.at(i).begin(),
+                                  next_resetResult.at(i).end());
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].guard.size(), next_guardResult.at(i).size());
     // BOOST_TEST(std::equal(to.states.at(i)->nextMap['a'][0].guard.begin(),
     //                       to.states.at(i)->nextMap['a'][0].guard.end(),

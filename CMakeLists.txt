@@ -19,36 +19,34 @@ include_directories(
   ${Boost_INCLUDE_DIRS})
 
 ## Config for Main filter
-add_executable(filt
-  monaa/main.cc
-  libmonaa/intersection.cc
-  libmonaa/ta2za.cc
-  monaa/tre.cc
-  monaa/intermediate_tre.cc)
+# add_executable(filt
+#   src/main.cc
+#   src/timed_moore_machine.cc)
 
 #target_link_libraries(filt
 #  profiler
 #  ${Boost_PROGRAM_OPTIONS_LIBRARY}
 #  ${Boost_GRAPH_LIBRARY})
 
-target_include_directories(filt
-  PRIVATE
-  .
-  ${CMAKE_CURRENT_BINARY_DIR})
-set_property(TARGET filt
-  PROPERTY CXX_STANDARD 14)
+# target_include_directories(filt
+#   PRIVATE
+#   .
+#   ${CMAKE_CURRENT_BINARY_DIR})
+# set_property(TARGET filt
+#   PROPERTY CXX_STANDARD 14)
 
 ## Config for Test
 enable_testing()
 
 add_executable(unit_test
-          test/unit_test.cc
-          test/moore_machine_test.cc
-          test/add_counter_test.cc
-          test/automata_test.cc
-          test/timed_moore_machine_test.cc
-          test/dbm_test.cc
-          test/bit_buffer_test.cc)
+  src/timed_moore_machine.cc
+  test/unit_test.cc
+  test/moore_machine_test.cc
+  test/add_counter_test.cc
+  test/automata_test.cc
+  test/timed_moore_machine_test.cc
+  test/dbm_test.cc
+  test/bit_buffer_test.cc)
 
 target_link_libraries(unit_test
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
