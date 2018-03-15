@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+experiments/abs2rel
+experiments/rel2abs_truncate
 
 # Emacs
 *~
