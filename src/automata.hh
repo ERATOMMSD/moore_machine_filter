@@ -32,6 +32,7 @@ struct NonDeterministicAutomatonState : public AutomatonState {
 struct NFAState : public NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>> {
   using Transition = std::weak_ptr<NFAState>;
   using ParentState = NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>>;
+  using Alphabet = unsigned char;
   using ParentState::ParentState;
   //  NFAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
 };
@@ -113,6 +114,7 @@ struct DRTATransition {
 //! @brief A state of a deterministic real-time automaton 
 struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState> {
   using ParentState = DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState>;
+  using Alphabet = std::pair<unsigned char, double>;
   boost::unordered_map<unsigned char, std::vector<DRTATransition>> nextMap;
   DRTAState (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<DRTATransition>> next = {}) : 
     ParentState(isMatch), nextMap(std::move(next)) {}

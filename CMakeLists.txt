@@ -19,21 +19,21 @@ include_directories(
   ${Boost_INCLUDE_DIRS})
 
 ## Config for Main filter
-# add_executable(filt
-#   src/main.cc
-#   src/timed_moore_machine.cc)
+add_executable(filt
+  src/main.cc
+  src/timed_moore_machine.cc)
 
-#target_link_libraries(filt
+target_link_libraries(filt
 #  profiler
-#  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-#  ${Boost_GRAPH_LIBRARY})
+ ${Boost_PROGRAM_OPTIONS_LIBRARY}
+ ${Boost_GRAPH_LIBRARY})
 
-# target_include_directories(filt
-#   PRIVATE
-#   .
-#   ${CMAKE_CURRENT_BINARY_DIR})
-# set_property(TARGET filt
-#   PROPERTY CXX_STANDARD 14)
+target_include_directories(filt
+  PRIVATE
+  .
+  ${CMAKE_CURRENT_BINARY_DIR})
+set_property(TARGET filt
+  PROPERTY CXX_STANDARD 14)
 
 ## Config for Test
 enable_testing()
