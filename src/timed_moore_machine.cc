@@ -75,7 +75,7 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
     std::unordered_multimap<std::shared_ptr<TAState>, DBM> currentStates = {initConfs.begin(), initConfs.end()};
     const auto useLowerFront = [&]() {
       const Bounds addedBounds = std::get<2>(lowerVec.front());
-      while (addedBounds == std::get<2>(lowerVec.front())) {
+      while (!lowerVec.empty() && addedBounds == std::get<2>(lowerVec.front())) {
         const auto addedPair = std::make_pair(std::get<0>(lowerVec.front()), std::get<1>(lowerVec.front()));
         auto its = initConfs.equal_range(std::get<0>(lowerVec.front()));
         for (auto it = its.first; it != its.second;) {
@@ -91,7 +91,7 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
     };
     const auto useUpperFront = [&]() {
       const Bounds removedBounds = std::get<3>(upperVec.front());
-      while (removedBounds == std::get<3>(upperVec.front())) {
+      while (!upperVec.empty() && removedBounds == std::get<3>(upperVec.front())) {
         std::pair<std::shared_ptr<TAState>, DBM> removedPair = {std::get<0>(upperVec.front()), std::get<1>(upperVec.front())};
         {
           auto its = initConfs.equal_range(std::get<0>(upperVec.front()));
@@ -154,6 +154,10 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
     while (!upperVec.empty()) {
       nextLineared[c].emplace_back(currentStates, std::get<3>(upperVec.front()));
       useUpperFront();
+    }
+
+    if (!std::isinf(nextLineared[c].back().second.first)) {
+      nextLineared[c].emplace_back(initConfs, Bounds{std::numeric_limits<double>::infinity(), false});
     }
   }
 }

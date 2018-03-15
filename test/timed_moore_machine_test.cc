@@ -122,11 +122,11 @@ BOOST_AUTO_TEST_CASE( linearlizeNexts1 )
 
   linearlizeNexts(nexts, initConfs, nextLineared);
   
-  // NOTE: the size of states is not 5 but 4 because we prohibit t = 0.
-  BOOST_CHECK_EQUAL(nextLineared['a'].size(), 4);
-  std::array<std::size_t, 4> expectedStatesNums = {{2, 3, 2, 1}};
-  std::array<Bounds, 4> expectedBounds = {{Bounds{2, true}, Bounds{3, false}, Bounds{4, false}, Bounds{5, false}}};
-  for (int i = 0; i < 4; i++) {
+  // NOTE: the size of states is not 6 but 5 because we prohibit t = 0.
+  BOOST_CHECK_EQUAL(nextLineared['a'].size(), 5);
+  std::array<std::size_t, 5> expectedStatesNums = {{2, 3, 2, 1, 0}};
+  std::array<Bounds, 5> expectedBounds = {{Bounds{2, true}, Bounds{3, false}, Bounds{4, false}, Bounds{5, false}, Bounds{std::numeric_limits<double>::infinity(), false}}};
+  for (int i = 0; i < 5; i++) {
     BOOST_CHECK_EQUAL(nextLineared['a'][i].first.size(), expectedStatesNums[i]);
     BOOST_CHECK_EQUAL(nextLineared['a'][i].second, expectedBounds[i]);
   }
@@ -138,9 +138,9 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNexts2, LinearlizeNexts )
   std::vector<Bounds> upperBounds = {Bounds{1, false}, Bounds{3, false}, Bounds{4, false}};
   construct(4, lowerBounds, upperBounds);
 
-  constexpr const std::size_t expectedNextStates = 5;
-  std::vector<std::size_t> expectedStatesNums = {1, 0, 1, 0, 1};
-  std::vector<Bounds> expectedBounds = {Bounds{1, false}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}};
+  constexpr const std::size_t expectedNextStates = 6;
+  std::vector<std::size_t> expectedStatesNums = {1, 0, 1, 0, 1, 0};
+  std::vector<Bounds> expectedBounds = {Bounds{1, false}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}, Bounds{std::numeric_limits<double>::infinity(), false}};
 
   test(expectedNextStates, expectedStatesNums, expectedBounds);
 }
@@ -161,9 +161,9 @@ BOOST_AUTO_TEST_CASE( linearlizeNexts3 )
   std::array<Bounds, targetSize> lowerBounds = {{Bounds{-0, false}, Bounds{-0, false}, Bounds{-2, true}, Bounds{-3, true}}};
   std::array<Bounds, targetSize> upperBounds = {{Bounds{1, true}, Bounds{3, true}, Bounds{3, true}, Bounds{4, true}}};
 
-  constexpr const std::size_t expectedNextStates = 5;
-  std::array<std::size_t, expectedNextStates> expectedStatesNums = {{2, 1, 2, 3, 1}};
-  std::array<Bounds, expectedNextStates> expectedBounds = {{Bounds{1, true}, Bounds{2, false}, Bounds{3, false}, Bounds{3, true}, Bounds{4, true}}};
+  constexpr const std::size_t expectedNextStates = 6;
+  std::array<std::size_t, expectedNextStates> expectedStatesNums = {{2, 1, 2, 3, 1, 0}};
+  std::array<Bounds, expectedNextStates> expectedBounds = {{Bounds{1, true}, Bounds{2, false}, Bounds{3, false}, Bounds{3, true}, Bounds{4, true}, Bounds{std::numeric_limits<double>::infinity(), false}}};
 
   nexts['a'].reserve(targetSize);
   for (std::size_t i = 0; i < targetSize; i++) {
@@ -191,9 +191,9 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNextsUpperOpenAndClosed, LinearlizeNexts )
   std::vector<Bounds> upperBounds = {{Bounds{5, true}, Bounds{5, false}}};
   construct(3, lowerBounds, upperBounds);
 
-  constexpr const std::size_t expectedNextStates = 4;
-  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 1}};
-  std::vector<Bounds> expectedBounds = {{Bounds{2, true}, Bounds{3, true}, Bounds{5, false}, Bounds{5, true}}};
+  constexpr const std::size_t expectedNextStates = 5;
+  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 1, 0}};
+  std::vector<Bounds> expectedBounds = {{Bounds{2, true}, Bounds{3, true}, Bounds{5, false}, Bounds{5, true}, Bounds{std::numeric_limits<double>::infinity(), false}}};
 
   test(expectedNextStates, expectedStatesNums, expectedBounds);
 }
@@ -204,9 +204,9 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNextsUpperOpenAndOpen, LinearlizeNexts )
   std::vector<Bounds> upperBounds = {{Bounds{5, false}, Bounds{5, false}}};
   construct(3, lowerBounds, upperBounds);
 
-  constexpr const std::size_t expectedNextStates = 3;
-  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2}};
-  std::vector<Bounds> expectedBounds = {{Bounds{2, true}, Bounds{3, true}, Bounds{5, false}}};
+  constexpr const std::size_t expectedNextStates = 4;
+  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 0}};
+  std::vector<Bounds> expectedBounds = {{Bounds{2, true}, Bounds{3, true}, Bounds{5, false}, Bounds{std::numeric_limits<double>::infinity(), false}}};
 
   test(expectedNextStates, expectedStatesNums, expectedBounds);
 }
@@ -217,9 +217,9 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNextsLowerOpenAndClosed, LinearlizeNexts )
   std::vector<Bounds> upperBounds = {{Bounds{5, true}, Bounds{4, false}}};
   construct(3, lowerBounds, upperBounds);
 
-  constexpr const std::size_t expectedNextStates = 4;
-  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 1}};
-  std::vector<Bounds> expectedBounds = {{Bounds{2, false}, Bounds{2, true}, Bounds{4, false}, Bounds{5, true}}};
+  constexpr const std::size_t expectedNextStates = 5;
+  std::vector<std::size_t> expectedStatesNums = {{0, 1, 2, 1, 0}};
+  std::vector<Bounds> expectedBounds = {{Bounds{2, false}, Bounds{2, true}, Bounds{4, false}, Bounds{5, true}, Bounds{std::numeric_limits<double>::infinity(), false}}};
 
   test(expectedNextStates, expectedStatesNums, expectedBounds);
 }
@@ -234,9 +234,9 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNextsEverythingAt3, LinearlizeNexts )
   std::vector<Bounds> upperBounds = {Bounds{3, false}, Bounds{3, true}, Bounds{5, false}, Bounds{4, false}};
   construct(5, lowerBounds, upperBounds);
 
-  constexpr const std::size_t expectedNextStates = 6;
-  std::vector<std::size_t> expectedStatesNums = {0, 1, 2, 2, 2, 1};
-  std::vector<Bounds> expectedBounds = {Bounds{1, true}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}, Bounds{5, false}};
+  constexpr const std::size_t expectedNextStates = 7;
+  std::vector<std::size_t> expectedStatesNums = {0, 1, 2, 2, 2, 1, 0};
+  std::vector<Bounds> expectedBounds = {Bounds{1, true}, Bounds{2, true}, Bounds{3, false}, Bounds{3, true}, Bounds{4, false}, Bounds{5, false}, Bounds{std::numeric_limits<double>::infinity(), false}};
 
   test(expectedNextStates, expectedStatesNums, expectedBounds);
 }
@@ -286,6 +286,7 @@ BOOST_AUTO_TEST_CASE(filterTest)
                                           maskChar<Alphabet>};
   
   std::vector<Alphabet> outputTimedWord;
+  outputTimedWord.reserve(inputTimedWord.size());
   std::vector<Alphabet> outputTimedWordExpected = {maskChar<Alphabet>,
                                                    maskChar<Alphabet>,
                                                    {'a', 0.2},
@@ -295,6 +296,7 @@ BOOST_AUTO_TEST_CASE(filterTest)
                                                    maskChar<Alphabet>};
   for (const auto &c: inputTimedWord) {
     outputTimedWord.push_back(filter.feed(c));
+    std::cout << outputTimedWord.back() << std::endl;
   }
   BOOST_CHECK_EQUAL_COLLECTIONS(outputTimedWord.begin(), outputTimedWord.end(),
                                 outputTimedWordExpected.begin(), outputTimedWordExpected.end());

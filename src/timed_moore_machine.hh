@@ -5,6 +5,7 @@
 #include "dbm.hh"
 #include "moore_machine.hh"
 
+// Over-approximate a timed automaton by a real-time automaton
 void constructNexts(const std::shared_ptr<DRTAState> &s,
                     std::unordered_map<std::shared_ptr<DRTAState>, std::unordered_multimap<std::shared_ptr<TAState>, DBM>> &toOldStates, 
                     boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> &nexts);
