@@ -339,3 +339,11 @@ struct TimedAutomaton : public Automaton<TAState> {
       });
   }
 };
+
+namespace std {
+  template<class T, class U>
+  static inline std::ostream &operator<<(std::ostream &os, const std::pair<T, U> &b) {
+    os << "(" << b.first << ", " << b.second << ")";
+    return os;
+  }
+};
