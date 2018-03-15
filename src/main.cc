@@ -23,11 +23,11 @@ static inline int getOne(FILE* file, std::pair<unsigned char, double> &p) {
 }
 
 static inline int putOne(FILE* file, const unsigned char &c) {
-  return fprintf(file, " %c\n", c);
+  return fprintf(file, "%c\n", c);
 }
 
 static inline int putOne(FILE* file, const std::pair<unsigned char, double> &p) {
-  return fprintf(file, " %c %lf\n", p.first, p.second);
+  return fprintf(file, "%c %lf\n", p.first, p.second);
 }
 
 template<int BufferSize>
