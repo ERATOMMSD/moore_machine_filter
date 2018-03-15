@@ -8,6 +8,10 @@
 #include "moore_machine.hh"
 #include "timed_moore_machine.hh"
 
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 10
+#endif
+
 using namespace boost::program_options;
 
 static inline int getOne(FILE* file, unsigned char &c) {
