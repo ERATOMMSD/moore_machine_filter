@@ -260,10 +260,11 @@ BOOST_AUTO_TEST_CASE(filterTest)
   std::array<std::weak_ptr<TAState>, 2> next_weak = {{from.states[1], from.states[2]}};
   std::array<std::vector<ClockVariables>, 2> next_reset = {{{}, {}}};
   std::array<std::vector<Constraint>, 2> next_guard = {{{TimedAutomaton::X(0) < 1}, {TimedAutomaton::X(0) < 1}}};
+  std::array<unsigned char, 2> next_char = {{'a', 'b'}};
 
   for (int i = 0; i < 2; i++) {
     from.states[i]->isMatch = match[i];
-    from.states[i]->nextMap['a'] = {{next_weak[i], next_reset[i], next_guard[i]}};
+    from.states[i]->nextMap[next_char[i]] = {{next_weak[i], next_reset[i], next_guard[i]}};
   }
   from.states[2]->isMatch = match[2];
 
@@ -275,6 +276,20 @@ BOOST_AUTO_TEST_CASE(filterTest)
   from.maxConstraints = {1};
 
   toAutomatonWithCounter(from, to);
+
+  BOOST_REQUIRE_EQUAL(to.states.size(), 3);
+  BOOST_TEST(!to.states[0]->isMatch);
+  BOOST_TEST(!to.states[1]->isMatch);
+  BOOST_TEST( to.states[2]->isMatch);
+  BOOST_CHECK_EQUAL(to.states[0]->nextMap['a'].size(), 1);
+  BOOST_CHECK_EQUAL(to.states[0]->nextMap['b'].size(), 0);
+  BOOST_CHECK_EQUAL(to.states[1]->nextMap['a'].size(), 0);
+  BOOST_CHECK_EQUAL(to.states[1]->nextMap['b'].size(), 1);
+  BOOST_TEST(to.states[2]->nextMap.empty());
+  BOOST_CHECK_EQUAL(to.counter[to.states[0]], 0);
+  BOOST_CHECK_EQUAL(to.counter[to.states[1]], 1);
+  BOOST_CHECK_EQUAL(to.counter[to.states[2]], 2);
+
   toTimedMooreMachine(to, Bounds{1, true}, 1, filter);
 
   std::vector<Alphabet> inputTimedWord = {{'a', 0.2},
@@ -291,12 +306,11 @@ BOOST_AUTO_TEST_CASE(filterTest)
                                                    maskChar<Alphabet>,
                                                    {'a', 0.2},
                                                    {'b', 0.6},
-                                                   maskChar<Alphabet>,
-                                                   maskChar<Alphabet>,
-                                                   maskChar<Alphabet>};
+                                                   mask(std::pair<unsigned char, double>{'a', 0.1}),
+                                                   mask(std::pair<unsigned char, double>{'b', 1.2}),
+                                                   mask(std::pair<unsigned char, double>{'a', 0.7})};
   for (const auto &c: inputTimedWord) {
     outputTimedWord.push_back(filter.feed(c));
-    std::cout << outputTimedWord.back() << std::endl;
   }
   BOOST_CHECK_EQUAL_COLLECTIONS(outputTimedWord.begin(), outputTimedWord.end(),
                                 outputTimedWordExpected.begin(), outputTimedWordExpected.end());

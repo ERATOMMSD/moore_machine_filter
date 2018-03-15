@@ -156,7 +156,7 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
       useUpperFront();
     }
 
-    if (!std::isinf(nextLineared[c].back().second.first)) {
+    if (nextLineared[c].empty() || !std::isinf(nextLineared[c].back().second.first)) {
       nextLineared[c].emplace_back(initConfs, Bounds{std::numeric_limits<double>::infinity(), false});
     }
   }

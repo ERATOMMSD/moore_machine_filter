@@ -18,12 +18,12 @@ template<>
 constexpr const std::pair<unsigned char, double> maskChar<std::pair<unsigned char, double>> = {'_', 0};
 
 template<class T>
-T mask(T) {
+constexpr T mask(T) {
   return maskChar<T>;
 }
 
 template<>
-inline std::pair<unsigned char, double> mask(std::pair<unsigned char, double> c) {
+constexpr inline std::pair<unsigned char, double> mask(std::pair<unsigned char, double> c) {
   return std::make_pair(maskChar<unsigned char>, c.second);
 }
 
