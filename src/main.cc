@@ -131,21 +131,19 @@ int main(int argc, char *argv[])
     isTimed = false;
   }
 
-  constexpr int BufferSize = 10;
-
   std::ifstream automatonStream(automatonFileName);
   if (isTimed) {
     TimedAutomaton TA;
     // parse TA
     automatonStream >> TA;
-    MooreMachine<BufferSize, std::pair<unsigned char, double>, DRTAState> filterMachine;
+    MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAState> filterMachine;
     constructFilter<TAState>(TA, filterMachine);
     filter(filterMachine, stdin, stdout);
   } else {
     // parse NFA
     NFA A;
     automatonStream >> A;
-    MooreMachine<BufferSize, unsigned char, DFAState> filterMachine;
+    MooreMachine<BUFFER_SIZE, unsigned char, DFAState> filterMachine;
     constructFilter<NFAState>(A, filterMachine);
     filter(filterMachine, stdin, stdout);
   }

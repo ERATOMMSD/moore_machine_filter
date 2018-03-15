@@ -1,9 +1,9 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-register")
-
 project(FILTERING_NFA CXX)
 
 cmake_minimum_required(VERSION 3.1)
-set(CMAKE_CXX_FLAGS "-Wall -std=c++14 -march=native")
+set(BUFFER_SIZE "10" CACHE STRING "Size of buffer in Moore machine")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14 -march=native -DBUFFER_SIZE=${BUFFER_SIZE}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-register")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-flto -O3 -DRELEASE")
 
