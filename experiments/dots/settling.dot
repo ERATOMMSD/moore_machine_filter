@@ -1,0 +1,9 @@
+digraph G {
+    start [init=1][match=0];
+    nml [init=0][match=0];
+    unstl [init=0][match=0];
+    fin [init=0][match=1];
+    start -> nml  [label="1"][reset="{0}"];
+    nml -> unstl  [label="0"];
+    unstl -> fin  [label="$"][guard="{x0 > 100}"];    
+}

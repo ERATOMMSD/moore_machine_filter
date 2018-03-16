@@ -1,0 +1,9 @@
+digraph G {
+    start [init=1][match=0];
+    g1 [init=0][match=0];
+    ng1 [init=0][match=0];
+    fin [init=0][match=1];
+    start -> g1  [label="1"][reset="{0}"]
+    g1 -> ng1  [label="2"][guard="{x0 < 2}"];
+    ng1 -> fin  [label="$"];
+}
