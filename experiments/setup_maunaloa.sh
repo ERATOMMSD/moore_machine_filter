@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd $(basename $0)
+mkdir -p ../build
+
 ## Set up input data
 mkdir -p /home/mwaga/Data/timedPatternMatching
 cd /home/mwaga/Data/timedPatternMatching && wget 'https://drive.google.com/uc?export=download&id=1ZHpRv7_fSmzW879unNlEHjx_wpZRYpiD' -O torque.tar.xz && tar xvf torque.tar.xz
