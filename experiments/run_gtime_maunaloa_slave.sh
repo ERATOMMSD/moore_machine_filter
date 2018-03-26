@@ -6,13 +6,16 @@ readonly date_str=$(date +%m%d%H%M%S)
 mkdir -p log/$date_str
 
 readonly buf_size=$1
+readonly ORIG_PWD=$PWD
 
 ## Set up input data
 mkdir -p /home/mwaga/Data/timedPatternMatching
 cd /home/mwaga/Data/timedPatternMatching && wget 'https://drive.google.com/uc?export=download&id=1ZHpRv7_fSmzW879unNlEHjx_wpZRYpiD' -O torque.tar.xz && tar xvf torque.tar.xz
 
 ## Set up latest MONAA
-cd /home/mwaga && rm -rf monaa && git clone https://github.com/MasWag/monaa.git && cd monaa && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
+cd /home/mwaga && rm -rf monaa && git clone https://github.com/MasWag/monaa.git && cd monaa && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-7 .. && make monaa -j2
+
+cd $ORIG_PWD
 
 if (($buf_size != 0)); then
     cd ../build && cmake -DCMAKE_BUILD_TYPE=Release -DBUFFER_SIZE=${buf_size} -DCMAKE_CXX_COMPILER=g++-7 .. && make -j3 filt && cd -
