@@ -7,8 +7,11 @@ mkdir -p log/$date_str
 
 readonly buf_size=$1
 
+mkdir -p /home/mwaga/Data/timedPatternmatching
+cd /home/mwaga/Data/timedPatternmatching && wget https://drive.google.com/uc?export=download&id=1ZHpRv7_fSmzW879unNlEHjx_wpZRYpiD -O torque.tar.xz && tar xvf torque.tar.xz
+
 if (($buf_size != 0)); then
-    cd ../build && cmake -DCMAKE_BUILD_TYPE=Release -DBUFFER_SIZE=${buf_size} .. && make -j3 filt && cd -
+    cd ../build && cmake -DCMAKE_BUILD_TYPE=Release -DBUFFER_SIZE=${buf_size} -DCMAKE_CXX_COMPILER=g++-7 .. && make -j3 filt && cd -
 
     # Torque
     for input in /home/mwaga/Data/timedPatternMatching/torque-*.dat; do
