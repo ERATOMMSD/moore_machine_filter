@@ -5,8 +5,8 @@ su mwaga
 cd
 
 # create experiment environment
-wget URI
-tar xvf moore_machine_filter.tar.xz
+wget "URI"
+unzip xvf moore_machine_filter.tar.xz
 
 # execute the experiment
 cd moore_machine_filter
