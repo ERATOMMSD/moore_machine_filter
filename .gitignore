@@ -44,4 +44,10 @@ GPATH
 GRTAGS
 GTAGS
 
+
+# Generated Files
 *.png
+
+experiments/*.wc
+experiments/log
+experiments/obsolete_logs
