@@ -2,7 +2,7 @@
 
 readonly RUN_TIMES=5
 
-readonly date_str=$(date +%m%d%H%M%S)
+readonly date_str="$(date +%m%d%H%M%S)$1"
 mkdir -p log/$date_str
 
 readonly BUFF_SIZES="$@"
