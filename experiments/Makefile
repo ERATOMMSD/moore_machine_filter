@@ -110,11 +110,11 @@ log/%/filt-wc-torque.tsv: log/%/filt-torque-*-torque-*.dat.txt make_filt-torque-
 	./make_filt-torque-wc.sh $@ filt-torque-
 torque.wc: ~/Data/timedPatternMatching/torque-*.dat
 	for input in ~/Data/timedPatternMatching/torque-*.dat; do cat $$input | sed 1d | wc -l; done | sort -n > /tmp/torque.wc1
-	for a in {1..18}; do cat /tmp/torque.wc1; done > $@
+	for a in $$(seq 18); do cat /tmp/torque.wc1; done > $@
 gear.wc: ~/Data/timedPatternMatching/Experiment3_AT-*-gear-signal.dat
 	for input in ~/Data/timedPatternMatching/Experiment3_AT-*-gear-signal.dat; do cat $$input | sed 1d | wc -l ;done | sort -n > /tmp/gear.wc1
-	for a in {1..18}; do cat /tmp/gear.wc1; done  > $@
+	for a in $$(seq 18); do cat /tmp/gear.wc1; done  > $@
 accel.wc: ~/Data/timedPatternMatching/Experiment3_AT-*.tsv
 	for input in ~/Data/timedPatternMatching/Experiment3_AT-*.tsv; do ./convMonaa.sh < $$input | wc -l ;done | sort -n > /tmp/accel.wc1
-	for a in {1..18}; do cat /tmp/accel.wc1; done  > $@
+	for a in $$(seq 18); do cat /tmp/accel.wc1; done  > $@
 
