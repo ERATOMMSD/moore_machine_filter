@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # $1: file_name
+if (($# < 1)); then
+    echo "Usage: $0 [file_name]"
+    exit 1
+fi
 
 # for N in $(cat $1 | cut -d ' ' -f 2 | uniq); do
 #     $N
