@@ -2,7 +2,7 @@
 
 # $1: file_name
 if (($# < 1)); then
-    echo "Usage: $0 [file_name]"
+    echo "Usage: $0 input_file [output_file] [plot_type]"
     exit 1
 fi
 
