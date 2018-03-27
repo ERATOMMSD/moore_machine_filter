@@ -17,23 +17,23 @@ log/%/filt-all-gear.tsv: gear.wc log/%/filt-time-gear.tsv log/%/filt-monaa-time-
 	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' > $@
 log/%/filt-all-torque.tsv: torque.wc log/%/filt-time-torque.tsv log/%/filt-monaa-time-torque.tsv log/%/filt-wc-torque.tsv log/%/no-filt-monaa-time-torque.tsv 
 	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' > $@
-log/%/filt-time-accel.tsv: log/%/filt-time-accel-*-Experiment3_AT-*.tsv.log make_filt-time.sh
+log/%/filt-time-accel.tsv: log/%/filt-time-accel-*-Experiment3_AT-*.tsv*.log make_filt-time.sh
 	./make_filt-time.sh $@ filt-time-accel-
-log/%/filt-monaa-time-accel.tsv: log/%/filt-monaa-time-accel-*-Experiment3_AT-*.tsv.log  make_filt-time.sh
+log/%/filt-monaa-time-accel.tsv: log/%/filt-monaa-time-accel-*-Experiment3_AT-*.tsv*.log  make_filt-time.sh
 	./make_filt-time.sh $@ filt-monaa-time-accel-
-log/%/no-filt-monaa-time-accel.tsv: log/%/no-filt-monaa-time-accel-*-Experiment3_AT-*.tsv.log  make_no-filt-time.sh
+log/%/no-filt-monaa-time-accel.tsv: log/%/no-filt-monaa-time-accel-*-Experiment3_AT-*.tsv*.log  make_no-filt-time.sh
 	./make_no-filt-time.sh $@ no-filt-monaa-time-accel-
-log/%/filt-time-gear.tsv: log/%/filt-time-gear-*-Experiment3_AT-*-gear-signal.dat.log make_filt-time.sh
+log/%/filt-time-gear.tsv: log/%/filt-time-gear-*-Experiment3_AT-*-gear-signal.dat*.log make_filt-time.sh
 	./make_filt-time.sh $@ filt-time-gear-
-log/%/no-filt-monaa-time-gear.tsv: log/%/no-filt-monaa-time-gear-*-Experiment3_AT-*-gear-signal.dat.log make_no-filt-time.sh
+log/%/no-filt-monaa-time-gear.tsv: log/%/no-filt-monaa-time-gear-*-Experiment3_AT-*-gear-signal.dat*.log make_no-filt-time.sh
 	./make_no-filt-time.sh $@ no-filt-monaa-time-gear-
-log/%/filt-monaa-time-gear.tsv: log/%/filt-monaa-time-gear-*-Experiment3_AT-*-gear-signal.dat.log make_filt-time.sh
+log/%/filt-monaa-time-gear.tsv: log/%/filt-monaa-time-gear-*-Experiment3_AT-*-gear-signal.dat*.log make_filt-time.sh
 	./make_filt-time.sh $@ filt-monaa-time-gear-
-log/%/filt-time-torque.tsv: log/%/filt-time-torque-*-torque-*.dat.log make_filt-torque-time.sh
+log/%/filt-time-torque.tsv: log/%/filt-time-torque-*-torque-*.dat*.log make_filt-torque-time.sh
 	./make_filt-torque-time.sh $@ filt-time-torque-
-log/%/filt-monaa-time-torque.tsv: log/%/filt-monaa-time-torque-*-torque-*.dat.log make_filt-time.sh
+log/%/filt-monaa-time-torque.tsv: log/%/filt-monaa-time-torque-*-torque-*.dat*.log make_filt-time.sh
 	./make_filt-time.sh $@ filt-monaa-time-torque-
-log/%/no-filt-monaa-time-torque.tsv: log/%/no-filt-monaa-time-torque-*-torque-*.dat.log make_no-filt-time.sh
+log/%/no-filt-monaa-time-torque.tsv: log/%/no-filt-monaa-time-torque-*-torque-*.dat*.log make_no-filt-time.sh
 	./make_no-filt-time.sh $@ no-filt-monaa-time-torque-
 log/%/filt-wc-accel.tsv: log/%/filt-accel-*-Experiment3_AT-*.tsv.txt make_filt-wc.sh
 	./make_filt-wc.sh $@ filt-accel-
