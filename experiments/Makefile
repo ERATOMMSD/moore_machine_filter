@@ -5,12 +5,79 @@ ACCEL = $(LOG_DIRS:/=/filt-all-accel.tsv)
 GEAR = $(LOG_DIRS:/=/filt-all-gear.tsv)
 TORQUE = $(LOG_DIRS:/=/filt-all-torque.tsv)
 
+log/%/logs: log/%/filt-all-accel.tsv log/%/filt-all-gear.tsv log/%/filt-all-torque.tsv
+
 logs: $(ACCEL) $(GEAR) $(TORQUE)
 
 rel2abs_truncate: rel2abs_truncate.c
 	$(CC) -O3 $< -o $@
 abs2rel: abs2rel.c
 	$(CC) -O3 $< -o $@ 
+log/%/filt-time-length-accel.png: log/%/filt-all-accel.tsv ./plot_filt_time-length.sh
+	./plot_filt_time-length.sh $< $@
+log/%/filt-time-length-gear.png: log/%/filt-all-gear.tsv ./plot_filt_time-length.sh
+	./plot_filt_time-length.sh $< $@
+log/%/filt-time-length-torque.png: log/%/filt-all-torque.tsv ./plot_filt_time-length.sh
+	./plot_filt_time-length.sh $< $@
+log/%/filt-time-length-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt_time-length.sh
+	./plot_filt_time-length.sh $< $@ tikz
+log/%/filt-time-length-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt_time-length.sh
+	./plot_filt_time-length.sh $< $@ tikz
+log/%/filt-time-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt_time-length.sh
+	./plot_filt_time-length.sh $< $@ tikz
+
+log/%/filt-RAM-length-accel.png: log/%/filt-all-accel.tsv ./plot_filt_RAM-length.sh
+	./plot_filt_RAM-length.sh $< $@
+log/%/filt-RAM-length-gear.png: log/%/filt-all-gear.tsv ./plot_filt_RAM-length.sh
+	./plot_filt_RAM-length.sh $< $@
+log/%/filt-RAM-length-torque.png: log/%/filt-all-torque.tsv ./plot_filt_RAM-length.sh
+	./plot_filt_RAM-length.sh $< $@
+log/%/filt-RAM-length-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt_RAM-length.sh
+	./plot_filt_RAM-length.sh $< $@ tikz
+log/%/filt-RAM-length-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt_RAM-length.sh
+	./plot_filt_RAM-length.sh $< $@ tikz
+log/%/filt-RAM-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt_RAM-length.sh
+	./plot_filt_RAM-length.sh $< $@ tikz
+
+log/%/filt-rate-N-accel.png: log/%/filt-all-accel.tsv ./plot_filt_rate-N.sh
+	./plot_filt_rate-N.sh $< $@
+log/%/filt-rate-N-gear.png: log/%/filt-all-gear.tsv ./plot_filt_rate-N.sh
+	./plot_filt_rate-N.sh $< $@
+log/%/filt-rate-N-torque.png: log/%/filt-all-torque.tsv ./plot_filt_rate-N.sh
+	./plot_filt_rate-N.sh $< $@
+log/%/filt-rate-N-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt_rate-N.sh
+	./plot_filt_rate-N.sh $< $@ tikz
+log/%/filt-rate-N-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt_rate-N.sh
+	./plot_filt_rate-N.sh $< $@ tikz
+log/%/filt-rate-N-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt_rate-N.sh
+	./plot_filt_rate-N.sh $< $@ tikz
+
+log/%/filt-rate-length-accel.png: log/%/filt-all-accel.tsv ./plot_filt_rate-length.sh
+	./plot_filt_rate-length.sh $< $@
+log/%/filt-rate-length-gear.png: log/%/filt-all-gear.tsv ./plot_filt_rate-length.sh
+	./plot_filt_rate-length.sh $< $@
+log/%/filt-rate-length-torque.png: log/%/filt-all-torque.tsv ./plot_filt_rate-length.sh
+	./plot_filt_rate-length.sh $< $@
+log/%/filt-rate-length-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt_rate-length.sh
+	./plot_filt_rate-length.sh $< $@ tikz
+log/%/filt-rate-length-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt_rate-length.sh
+	./plot_filt_rate-length.sh $< $@ tikz
+log/%/filt-rate-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt_rate-length.sh
+	./plot_filt_rate-length.sh $< $@ tikz
+
+log/%/filt-time-monaa-length-accel.png: log/%/filt-all-accel.tsv ./plot_monaa_filt_time_0-10.sh
+	./plot_monaa_filt_time_0-10.sh $< $@
+log/%/filt-time-monaa-length-gear.png: log/%/filt-all-gear.tsv ./plot_monaa_filt_time_0-10.sh
+	./plot_monaa_filt_time_0-10.sh $< $@
+log/%/filt-time-monaa-length-torque.png: log/%/filt-all-torque.tsv ./plot_monaa_filt_time_0-10.sh
+	./plot_monaa_filt_time_0-10.sh $< $@
+log/%/filt-time-monaa-length-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_monaa_filt_time_0-10.sh
+	./plot_monaa_filt_time_0-10.sh $< $@ tikz
+log/%/filt-time-monaa-length-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_monaa_filt_time_0-10.sh
+	./plot_monaa_filt_time_0-10.sh $< $@ tikz
+log/%/filt-time-monaa-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_monaa_filt_time_0-10.sh
+	./plot_monaa_filt_time_0-10.sh $< $@ tikz
+
 log/%/filt-all-accel.tsv: accel.wc log/%/filt-time-accel.tsv log/%/filt-monaa-time-accel.tsv log/%/filt-wc-accel.tsv log/%/no-filt-monaa-time-accel.tsv 
 	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' > $@
 log/%/filt-all-gear.tsv: gear.wc log/%/filt-time-gear.tsv log/%/filt-monaa-time-gear.tsv log/%/filt-wc-gear.tsv log/%/no-filt-monaa-time-gear.tsv 
@@ -32,7 +99,7 @@ log/%/filt-monaa-time-gear.tsv: log/%/filt-monaa-time-gear-*-Experiment3_AT-*-ge
 log/%/filt-time-torque.tsv: log/%/filt-time-torque-*-torque-*.dat*.log make_filt-torque-time.sh
 	./make_filt-torque-time.sh $@ filt-time-torque-
 log/%/filt-monaa-time-torque.tsv: log/%/filt-monaa-time-torque-*-torque-*.dat*.log make_filt-time.sh
-	./make_filt-time.sh $@ filt-monaa-time-torque-
+	./make_filt-torque-time.sh $@ filt-monaa-time-torque-
 log/%/no-filt-monaa-time-torque.tsv: log/%/no-filt-monaa-time-torque-*-torque-*.dat*.log make_no-filt-time.sh
 	./make_no-filt-time.sh $@ no-filt-monaa-time-torque-
 log/%/filt-wc-accel.tsv: log/%/filt-accel-*-Experiment3_AT-*.tsv.txt make_filt-wc.sh

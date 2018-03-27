@@ -23,4 +23,4 @@ fi
 #     $N
 # done
 
-cat $1 | cut -d ' ' -f 2 | sort -n | uniq | xargs -I{} echo -n "\"< awk '\$2=={}' $1\" using 1:7 with lp title \"BUFF\\\_SIZE={}\", " | cat <(echo -n 'plot ') - | gnuplot <(echo "set terminal $plottype"; echo "set output \"$output\"") -
+cat $1 | cut -d ' ' -f 2 | sort -n | uniq | xargs -I{} echo -n "\"< awk '\$2=={}' $1\" using 1:7 with lp title \"BUFF\\\_SIZE={}\", " | cat <(echo -n 'plot ') - | gnuplot <(echo "set terminal $plottype"; echo "set output \"$output\"";echo 'set xlabel "length of the input log"';echo 'set ylabel "length of the filtered log"';echo 'set size square';echo 'set size ratio -1') -
