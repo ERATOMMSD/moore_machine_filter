@@ -7,6 +7,18 @@ if (($# < 1)); then
 fi
 
 
+if (($# < 2)); then
+    output=/tmp/out.png
+else
+    output=$2
+fi
+
+if (($# < 3)); then
+    plottype=png
+else
+    plottype=$3
+fi
+
 # for N in $(cat $1 | cut -d ' ' -f 2 | uniq); do
 #     $N
 # done
