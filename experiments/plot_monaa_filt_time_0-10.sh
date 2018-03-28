@@ -22,4 +22,4 @@ fi
 #     $N
 # done
 
-cat $1 | cut -d ' ' -f 2 | sort -n | uniq | awk '$1<=10' | xargs -I{} echo -n "\"< awk '\$2=={}' $1\" using 1:5 with lp title \"BUFF\\\_SIZE={}\", " | cat <(echo -n "plot \"< sort -n -k8,8 $1 | uniq -f 7 | sort -n -k1,1 \" using 1:8 w lp title \"BUFF\\\_SIZE=0\", ") - | gnuplot <(echo "set terminal $plottype"; echo "set output \"$output\""; echo 'set xlabel "length of the input log"'; echo 'set ylabel "execution time [s]"') -
+cat $1 | cut -d ' ' -f 2 | sort -n | uniq | awk '$1<=10' | xargs -I{} echo -n "\"< awk '\$2=={}' $1\" using (\$1/100000):5 with lp title \"\$N={}\$\", " | cat <(echo -n "plot \"< sort -n -k8,8 $1 | uniq -f 7 | sort -n -k1,1 \" using (\$1/100000):8 w lp title \"NOT FILTERED\", ") - | gnuplot <(echo "set terminal $plottype"; echo "set output \"$output\""; echo 'set xlabel "Length of the Input Timed Word $[\\times 100000]$"'; echo 'set ylabel "Execution Time [s]"') -

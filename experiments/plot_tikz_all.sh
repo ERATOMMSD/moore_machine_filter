@@ -1,0 +1,3 @@
+#!/bin/bash
+
+make $1/filt-time-length-accel.tikz.tex $1/filt-time-length-gear.tikz.tex $1/filt-time-length-torque.tikz.tex $1/filt-RAM-length-accel.tikz.tex $1/filt-RAM-length-gear.tikz.tex $1/filt-RAM-length-torque.tikz.tex $1/filt-rate-N-accel.tikz.tex $1/filt-rate-N-gear.tikz.tex $1/filt-rate-N-torque.tikz.tex $1/filt-rate-length-accel.tikz.tex $1/filt-rate-length-gear.tikz.tex $1/filt-rate-length-torque.tikz.tex $1/filt-time-monaa-length-accel.tikz.tex $1/filt-time-monaa-length-gear.tikz.tex $1/filt-time-monaa-length-torque.tikz.tex $1/filt-vs-monaa-accel.tikz.tex $1/filt-vs-monaa-gear.tikz.tex $1/filt-vs-monaa-torque.tikz.tex

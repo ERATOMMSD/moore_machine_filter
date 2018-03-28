@@ -1,4 +1,4 @@
-all: rel2abs_truncate abs2rel
+all: rel2abs_truncate abs2rel convMonaa
 
 LOG_DIRS = $(wildcard log/*/)
 ACCEL = $(LOG_DIRS:/=/filt-all-accel.tsv)
@@ -13,18 +13,34 @@ rel2abs_truncate: rel2abs_truncate.c
 	$(CC) -O3 $< -o $@
 abs2rel: abs2rel.c
 	$(CC) -O3 $< -o $@ 
-log/%/filt-time-length-accel.png: log/%/filt-all-accel.tsv ./plot_filt_time-length.sh
-	./plot_filt_time-length.sh $< $@
-log/%/filt-time-length-gear.png: log/%/filt-all-gear.tsv ./plot_filt_time-length.sh
-	./plot_filt_time-length.sh $< $@
-log/%/filt-time-length-torque.png: log/%/filt-all-torque.tsv ./plot_filt_time-length.sh
-	./plot_filt_time-length.sh $< $@
-log/%/filt-time-length-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt_time-length.sh
-	./plot_filt_time-length.sh $< $@ tikz
-log/%/filt-time-length-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt_time-length.sh
-	./plot_filt_time-length.sh $< $@ tikz
-log/%/filt-time-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt_time-length.sh
-	./plot_filt_time-length.sh $< $@ tikz
+convMonaa: convMonaa.cc
+	$(CXX) --std=c++14 -O3 $< -o $@ 
+
+log/%/filt-time-length-accel.png: log/%/filt-all-accel.tsv ./plot_filt_time-length_0-10.sh
+	./plot_filt_time-length_0-10.sh $< $@
+log/%/filt-time-length-gear.png: log/%/filt-all-gear.tsv ./plot_filt_time-length_0-10.sh
+	./plot_filt_time-length_0-10.sh $< $@
+log/%/filt-time-length-torque.png: log/%/filt-all-torque.tsv ./plot_filt_time-length_0-10.sh
+	./plot_filt_time-length_0-10.sh $< $@
+log/%/filt-time-length-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt_time-length_0-10.sh
+	./plot_filt_time-length_0-10.sh $< $@ tikz
+log/%/filt-time-length-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt_time-length_0-10.sh
+	./plot_filt_time-length_0-10.sh $< $@ tikz
+log/%/filt-time-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt_time-length_0-10.sh
+	./plot_filt_time-length_0-10.sh $< $@ tikz
+
+log/%/filt-vs-monaa-accel.png: log/%/filt-all-accel.tsv ./plot_filt-vs-monaa-0-10.sh
+	./plot_filt-vs-monaa-0-10.sh $< $@
+log/%/filt-vs-monaa-gear.png: log/%/filt-all-gear.tsv ./plot_filt-vs-monaa-0-10.sh
+	./plot_filt-vs-monaa-0-10.sh $< $@
+log/%/filt-vs-monaa-torque.png: log/%/filt-all-torque.tsv ./plot_filt-vs-monaa-0-10.sh
+	./plot_filt-vs-monaa-0-10.sh $< $@
+log/%/filt-vs-monaa-accel.tikz.tex: log/%/filt-all-accel.tsv ./plot_filt-vs-monaa-0-10.sh
+	./plot_filt-vs-monaa-0-10.sh $< $@ tikz
+log/%/filt-vs-monaa-gear.tikz.tex: log/%/filt-all-gear.tsv ./plot_filt-vs-monaa-0-10.sh
+	./plot_filt-vs-monaa-0-10.sh $< $@ tikz
+log/%/filt-vs-monaa-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_filt-vs-monaa-0-10.sh
+	./plot_filt-vs-monaa-0-10.sh $< $@ tikz
 
 log/%/filt-RAM-length-accel.png: log/%/filt-all-accel.tsv ./plot_filt_RAM-length.sh
 	./plot_filt_RAM-length.sh $< $@
@@ -79,11 +95,11 @@ log/%/filt-time-monaa-length-torque.tikz.tex: log/%/filt-all-torque.tsv ./plot_m
 	./plot_monaa_filt_time_0-10.sh $< $@ tikz
 
 log/%/filt-all-accel.tsv: accel.wc log/%/filt-time-accel.tsv log/%/filt-monaa-time-accel.tsv log/%/filt-wc-accel.tsv log/%/no-filt-monaa-time-accel.tsv 
-	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' > $@
+	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' | awk '$$2<=10' > $@
 log/%/filt-all-gear.tsv: gear.wc log/%/filt-time-gear.tsv log/%/filt-monaa-time-gear.tsv log/%/filt-wc-gear.tsv log/%/no-filt-monaa-time-gear.tsv 
-	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' > $@
+	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' | awk '$$2<=10' > $@
 log/%/filt-all-torque.tsv: torque.wc log/%/filt-time-torque.tsv log/%/filt-monaa-time-torque.tsv log/%/filt-wc-torque.tsv log/%/no-filt-monaa-time-torque.tsv 
-	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' > $@
+	paste $^ | awk '{print $$1,$$3,$$4,$$5,$$8,$$9,$$12,$$14}' | awk '$$2<=10' > $@
 log/%/filt-time-accel.tsv: log/%/filt-time-accel-*-Experiment3_AT-*.tsv*.log make_filt-time.sh
 	./make_filt-time.sh $@ filt-time-accel-
 log/%/filt-monaa-time-accel.tsv: log/%/filt-monaa-time-accel-*-Experiment3_AT-*.tsv*.log  make_filt-time.sh
