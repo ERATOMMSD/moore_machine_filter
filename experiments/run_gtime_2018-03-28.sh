@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readonly RUN_TIMES=5
+readonly RUN_TIMES=20
 readonly BUFF_SIZES="1 2 3 4 5 10"
 
 readonly date_str=$(date +%m%d%H%M%S)
