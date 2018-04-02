@@ -35,6 +35,23 @@ target_include_directories(filt
 set_property(TARGET filt
   PROPERTY CXX_STANDARD 14)
 
+## Config for Construct only version
+add_executable(construct_only
+  src/construct_only.cc
+  src/timed_moore_machine.cc)
+
+target_link_libraries(construct_only
+#  profiler
+ ${Boost_PROGRAM_OPTIONS_LIBRARY}
+ ${Boost_GRAPH_LIBRARY})
+
+target_include_directories(construct_only
+  PRIVATE
+  .
+  ${CMAKE_CURRENT_BINARY_DIR})
+set_property(TARGET construct_only
+  PROPERTY CXX_STANDARD 14)
+
 ## Config for Test
 enable_testing()
 
