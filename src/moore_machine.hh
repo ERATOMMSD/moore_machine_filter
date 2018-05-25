@@ -29,10 +29,10 @@ constexpr inline std::pair<unsigned char, double> mask(std::pair<unsigned char, 
 
 template<int BufferSize, class Alphabet, class State>
 struct MooreMachine : public Automaton<State> {
-  std::unordered_map<std::shared_ptr<State>, std::size_t> counter;
+  std::unordered_map<State*, std::size_t> counter;
   std::queue<Alphabet> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
-  std::shared_ptr<State> currentState;
+  State* currentState;
   MooreMachine() {
     for (int i = 0; i < BufferSize; i++) {
       charBuffer.push(maskChar<Alphabet>);
@@ -58,18 +58,18 @@ struct MooreMachine : public Automaton<State> {
 template<int BufferSize>
 void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, unsigned char, DFAState> &to) {
   // S_{old} -> Int -> S_{new}
-  boost::unordered_map<std::vector<std::shared_ptr<NFAState>>, std::shared_ptr<DFAState>> toNewState;
-  boost::unordered_map<std::shared_ptr<DFAState>, std::vector<std::shared_ptr<NFAState>>> toOldStates;
-  std::vector<std::shared_ptr<DFAState>> currStates;
+  boost::unordered_map<std::vector<NFAState*>, DFAState*> toNewState;
+  boost::unordered_map<DFAState*, std::vector<NFAState*>> toOldStates;
+  std::vector<DFAState*> currStates;
 
-  const auto addNewState = [&](const std::vector<std::shared_ptr<NFAState>> &s) -> std::shared_ptr<DFAState> {
+  const auto addNewState = [&](const std::vector<NFAState*> &s) -> DFAState* {
     // isMatch
-    auto newState = std::make_shared<DFAState>(std::any_of(s.begin(), s.end(), [](std::shared_ptr<NFAState> ps) {
+    auto newState = new DFAState(std::any_of(s.begin(), s.end(), [](NFAState* ps) {
           return ps->isMatch;
         }));
     toNewState[s] = newState;
     toOldStates[newState] = s;
-    to.counter[newState] = std::accumulate(s.begin(), s.end(), 0, [&](int x, std::shared_ptr<NFAState> ps) {
+    to.counter[newState] = std::accumulate(s.begin(), s.end(), 0, [&](int x, NFAState* ps) {
         if (from.counter[ps] == BufferSize) {
           return BufferSize;
         } else if (ps->isMatch) {
@@ -88,16 +88,16 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, u
   to.currentState = to.initialStates[0];
 
   while (!currStates.empty()) {
-    std::vector<std::shared_ptr<DFAState>> prevStates = std::move(currStates);
+    std::vector<DFAState*> prevStates = std::move(currStates);
     currStates.clear();
     for (auto s: prevStates) {
       // merge the next unordered_map of each NFAState
-      std::unordered_map<unsigned char, std::vector<std::shared_ptr<NFAState>>> mergedNext;
+      std::unordered_map<unsigned char, std::vector<NFAState*>> mergedNext;
       for (auto vecs: toOldStates[s]) {
         for (const auto &nextPair: vecs->nextMap) {
           mergedNext[nextPair.first].reserve(mergedNext[nextPair.first].size() + nextPair.second.size());
-          for (std::weak_ptr<NFAState> ws: nextPair.second) {
-            mergedNext[nextPair.first].push_back(ws.lock());
+          for (NFAState* ws: nextPair.second) {
+            mergedNext[nextPair.first].push_back(ws);
           }
         }
       }
@@ -109,7 +109,7 @@ void toMooreMachine(NFAWithCounter<BufferSize> &from, MooreMachine<BufferSize, u
 
       // add a transition to the next DFAState
       for (auto nextPair: mergedNext) {
-        std::weak_ptr<DFAState> newTarget;
+        DFAState* newTarget;
 
         auto it = toNewState.find(nextPair.second);
         if (it == toNewState.end()) {

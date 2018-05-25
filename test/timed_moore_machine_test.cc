@@ -8,9 +8,9 @@ BOOST_AUTO_TEST_SUITE(TimedMooreMachineTest)
 
 BOOST_AUTO_TEST_CASE( constructNexts1 )
 {
-  std::array<std::shared_ptr<TAState>, 4> states;
+  std::array<TAState*, 4> states;
   for(auto &s: states) {
-    s = std::make_shared<TAState>();
+    s = new TAState();
   }
   states[0]->nextMap['a'] = {{states[1], {}, {TimedAutomaton::X(0) > 4, TimedAutomaton::X(0) < 6}},
                              {states[2], {0}, {TimedAutomaton::X(0) > 5, TimedAutomaton::X(0) < 7}},
@@ -23,15 +23,15 @@ BOOST_AUTO_TEST_CASE( constructNexts1 )
   D.value(1, 0) = Bounds{5, false};
   D.value(0, 1) = Bounds{-3, false};
 
-  std::shared_ptr<DRTAState> s = std::make_shared<DRTAState>();
-  std::unordered_map<std::shared_ptr<DRTAState>, std::unordered_multimap<std::shared_ptr<TAState>, DBM>> toOldStates;
+  DRTAState* s = new DRTAState();
+  std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> toOldStates;
   toOldStates[s].emplace(std::make_pair(states[0], D));
-  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
 
   constructNexts(s, toOldStates, nexts);
 
   BOOST_REQUIRE_EQUAL(nexts['a'].size(), 3);
-  std::array<std::shared_ptr<TAState>, 3> expectedStates = {{states[1], states[2], states[3]}};
+  std::array<TAState*, 3> expectedStates = {{states[1], states[2], states[3]}};
   std::array<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>, 3> expectedDBMs;
   for (auto &D: expectedDBMs) {
       D.resize(2, 2);
@@ -59,7 +59,7 @@ public:
                  const std::vector<Bounds> &upperBounds) {
     states.resize(stateSize);
     for(auto &s: states) {
-      s = std::make_shared<TAState>();
+      s = new TAState();
     }
     DBMs.resize(stateSize-1);
     for (auto &D: DBMs) {
@@ -75,8 +75,8 @@ public:
   void test (const std::size_t expectedStates,
              const std::vector<std::size_t> &expectedStatesNums,
              const std::vector<Bounds> expectedBounds) {
-    std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
-    std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
+    std::unordered_multimap<TAState*, DBM> initConfs;
+    std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> nextLineared;
 
     linearlizeNexts(nexts, initConfs, nextLineared);
   
@@ -86,19 +86,19 @@ public:
       BOOST_CHECK_EQUAL(nextLineared['a'][i].second, expectedBounds[i]);
     }
   }
-  std::vector<std::shared_ptr<TAState>> states;  
-  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  std::vector<TAState*> states;  
+  boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
   std::vector<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>> DBMs;
 };
 
 BOOST_AUTO_TEST_CASE( linearlizeNexts1 )
 {
-  std::array<std::shared_ptr<TAState>, 4> states;
+  std::array<TAState*, 4> states;
   for(auto &s: states) {
-    s = std::make_shared<TAState>();
+    s = new TAState();
   }
 
-  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
   std::array<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>, 3> DBMs;
   for (auto &D: DBMs) {
     D.resize(2, 2);
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE( linearlizeNexts1 )
   }
 
 
-  std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
-  std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
+  std::unordered_multimap<TAState*, DBM> initConfs;
+  std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> nextLineared;
 
   linearlizeNexts(nexts, initConfs, nextLineared);
   
@@ -147,12 +147,12 @@ BOOST_FIXTURE_TEST_CASE( linearlizeNexts2, LinearlizeNexts )
 
 BOOST_AUTO_TEST_CASE( linearlizeNexts3 )
 {
-  std::array<std::shared_ptr<TAState>, 5> states;
+  std::array<TAState*, 5> states;
   for(auto &s: states) {
-    s = std::make_shared<TAState>();
+    s = new TAState();
   }
 
-  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+  boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
   constexpr const std::size_t targetSize = 4;
   std::array<Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic>, targetSize> DBMs;
   for (auto &D: DBMs) {
@@ -173,8 +173,8 @@ BOOST_AUTO_TEST_CASE( linearlizeNexts3 )
   }
 
 
-  std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
-  std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
+  std::unordered_multimap<TAState*, DBM> initConfs;
+  std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> nextLineared;
 
   linearlizeNexts(nexts, initConfs, nextLineared);
   
@@ -253,11 +253,11 @@ BOOST_AUTO_TEST_CASE(filterTest)
   from.states.reserve(3);
 
   for (int i = 0; i < 3; i++) {
-    from.states.push_back(std::make_shared<TAState>());
+    from.states.push_back(new TAState());
   }
 
   std::array<bool, 3> match = {{false, false, true}};
-  std::array<std::weak_ptr<TAState>, 2> next_weak = {{from.states[1], from.states[2]}};
+  std::array<TAState*, 2> next_weak = {{from.states[1], from.states[2]}};
   std::array<std::vector<ClockVariables>, 2> next_reset = {{{}, {}}};
   std::array<std::vector<Constraint>, 2> next_guard = {{{TimedAutomaton::X(0) < 1}, {TimedAutomaton::X(0) < 1}}};
   std::array<unsigned char, 2> next_char = {{'a', 'b'}};

@@ -4,7 +4,7 @@
 
 template<class T, int BufferSize>
 struct AutomatonWithCounter : public Automaton<T> {
-  std::unordered_map<std::shared_ptr<T>, std::size_t> counter;
+  std::unordered_map<T*, std::size_t> counter;
 };
 
 template<int BufferSize>
@@ -17,11 +17,11 @@ using TAWithCounter = AutomatonWithCounter<TAState, BufferSize>;
 template<class State, int BufferSize>
 void toAutomatonWithCounter(const Automaton<State> &from, AutomatonWithCounter<State, BufferSize> &to) {
   // S_{old} -> Int -> S_{new}
-  boost::unordered_map<std::pair<std::shared_ptr<State>, std::size_t>, std::shared_ptr<State>> toNewState;
-  std::vector<std::shared_ptr<State>> currStates;
+  boost::unordered_map<std::pair<State*, std::size_t>, State*> toNewState;
+  std::vector<State*> currStates;
 
-  const auto addNewState = [&](std::shared_ptr<State> s, std::size_t c) -> std::shared_ptr<State> {
-    auto newState = std::make_shared<State>(*s);
+  const auto addNewState = [&](State* s, std::size_t c) -> State* {
+    auto newState = new State(*s);
     toNewState[std::make_pair(s, c)] = newState;
     to.counter[newState] = c;
     to.states.push_back(newState);
@@ -36,7 +36,7 @@ void toAutomatonWithCounter(const Automaton<State> &from, AutomatonWithCounter<S
   std::sort(to.initialStates.begin(), to.initialStates.end());
 
   while (!currStates.empty()) {
-    std::vector<std::shared_ptr<State>> prevStates = std::move(currStates);
+    std::vector<State*> prevStates = std::move(currStates);
     currStates.clear();
 
     for (auto s: prevStates) {
@@ -45,7 +45,7 @@ void toAutomatonWithCounter(const Automaton<State> &from, AutomatonWithCounter<S
  
       for (auto &nextPair: s->nextMap) {
         for (typename State::Transition &nextS: nextPair.second) {
-          const std::shared_ptr<State> nextS_shared = nextS.lock();
+          State* nextS_shared = nextS;
 
           auto it = toNewState.find(std::make_pair(nextS_shared, nextCount));
           if (it == toNewState.end()) {

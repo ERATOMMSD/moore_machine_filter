@@ -7,9 +7,9 @@ BOOST_AUTO_TEST_SUITE(AutomataTest)
 
 BOOST_AUTO_TEST_CASE( DRTAStateNext )
 {
-  std::array<std::shared_ptr<DRTAState>, 4> states;
+  std::array<DRTAState*, 4> states;
   for (auto& s: states) {
-    s = std::make_shared<DRTAState>();
+    s = new DRTAState();
   }
 
   states[0]->nextMap['a'] = {

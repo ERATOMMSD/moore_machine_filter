@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
   from.states.reserve(4);
 
   for (int i = 0; i < 4; i++) {
-    from.states.push_back(std::make_shared<NFAState>());
+    from.states.push_back(new NFAState());
   }
 
   std::array<bool, 4> match = {{false, false, true, false}};
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( filter1 )
   nfa.states.reserve(4);
 
   for (int i = 0; i < 4; i++) {
-    nfa.states.push_back(std::make_shared<NFAState>());
+    nfa.states.push_back(new NFAState());
   }
 
   std::array<bool, 4> match = {{false, false, false, true}};

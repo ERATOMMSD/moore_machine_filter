@@ -1,8 +1,8 @@
 #include "timed_moore_machine.hh"
 
-void constructNexts(const std::shared_ptr<DRTAState> &s,
-                    std::unordered_map<std::shared_ptr<DRTAState>, std::unordered_multimap<std::shared_ptr<TAState>, DBM>> &toOldStates, 
-                    boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> &nexts) 
+void constructNexts(DRTAState *s,
+                    std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
+                    boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts) 
 {
   nexts.clear();
   for (auto old_s: toOldStates[s]) {
@@ -38,23 +38,23 @@ void constructNexts(const std::shared_ptr<DRTAState> &s,
           constraintsToDBM(transition.guard, constraintZone);
           Bounds lowerBound, upperBound;
           currentZone.findDuration(constraintZone, lowerBound, upperBound);
-          nexts[nextPair.first].emplace_back(transition.target.lock(), nextZone, lowerBound, upperBound);
+          nexts[nextPair.first].emplace_back(transition.target, nextZone, lowerBound, upperBound);
         }
       }
     }
   }
 }
 
-void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> &nexts,
-                     const std::unordered_multimap<std::shared_ptr<TAState>, DBM> &initConfs,
-                     std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> &nextLineared) 
+void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts,
+                     const std::unordered_multimap<TAState*, DBM> &initConfs,
+                     std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> &nextLineared) 
 {
-  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nextsLower = nexts;
-  boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nextsUpper = nexts;
+  boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nextsLower = nexts;
+  boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nextsUpper = nexts;
 
   for (auto& n: nextsLower) {
-    std::sort(n.second.begin(), n.second.end(), [](const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &x,
-                                                   const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &y) {
+    std::sort(n.second.begin(), n.second.end(), [](const std::tuple<TAState*, DBM, Bounds, Bounds> &x,
+                                                   const std::tuple<TAState*, DBM, Bounds, Bounds> &y) {
                 return std::get<2>(x) > std::get<2>(y);
               });
     for (auto &l: n.second) {
@@ -62,17 +62,17 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
     }
   }
   for (auto& n: nextsUpper) {
-    std::sort(n.second.begin(), n.second.end(), [](const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &x,
-                                                   const std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds> &y) {
+    std::sort(n.second.begin(), n.second.end(), [](const std::tuple<TAState*, DBM, Bounds, Bounds> &x,
+                                                   const std::tuple<TAState*, DBM, Bounds, Bounds> &y) {
                 return std::get<3>(x) < std::get<3>(y);
               });
   }
   for (const auto &lower: nextsLower) {
     const unsigned char c = lower.first;
-    std::deque<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>> lowerVec(lower.second.begin(), lower.second.end());
-    std::deque<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>> upperVec(nextsUpper[c].begin(), nextsUpper[c].end());
+    std::deque<std::tuple<TAState*, DBM, Bounds, Bounds>> lowerVec(lower.second.begin(), lower.second.end());
+    std::deque<std::tuple<TAState*, DBM, Bounds, Bounds>> upperVec(nextsUpper[c].begin(), nextsUpper[c].end());
 
-    std::unordered_multimap<std::shared_ptr<TAState>, DBM> currentStates = {initConfs.begin(), initConfs.end()};
+    std::unordered_multimap<TAState*, DBM> currentStates = {initConfs.begin(), initConfs.end()};
     const auto useLowerFront = [&]() {
       const Bounds addedBounds = std::get<2>(lowerVec.front());
       while (!lowerVec.empty() && addedBounds == std::get<2>(lowerVec.front())) {
@@ -92,7 +92,7 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
     const auto useUpperFront = [&]() {
       const Bounds removedBounds = std::get<3>(upperVec.front());
       while (!upperVec.empty() && removedBounds == std::get<3>(upperVec.front())) {
-        std::pair<std::shared_ptr<TAState>, DBM> removedPair = {std::get<0>(upperVec.front()), std::get<1>(upperVec.front())};
+        std::pair<TAState*, DBM> removedPair = {std::get<0>(upperVec.front()), std::get<1>(upperVec.front())};
         {
           auto its = initConfs.equal_range(std::get<0>(upperVec.front()));
           for (auto it = its.first; it != its.second;) {

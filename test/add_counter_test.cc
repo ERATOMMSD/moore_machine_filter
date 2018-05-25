@@ -14,11 +14,11 @@ BOOST_AUTO_TEST_CASE( NFAAddCounter )
   from.states.reserve(3);
 
   for (int i = 0; i < 3; i++) {
-    from.states.push_back(std::make_shared<NFAState>());
+    from.states.push_back(new NFAState());
   }
 
   std::array<bool, 3> match = {{false, false, true}};
-  std::array<std::weak_ptr<NFAState>, 3> next_weak = {{from.states[1], from.states[2], from.states[0]}};
+  std::array<NFAState*, 3> next_weak = {{from.states[1], from.states[2], from.states[0]}};
 
   for (int i = 0; i < 3; i++) {
     from.states[i]->isMatch = match[i];
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( NFAAddCounter )
   BOOST_REQUIRE_EQUAL(to.initialStates.size(), 1);
 
   std::array<bool, 7> matchResult = {{false, false, true, false, false, true, false}};
-  std::array<std::weak_ptr<NFAState>, 7> next_weakResult = 
+  std::array<NFAState*, 7> next_weakResult = 
     {{to.states[1], to.states[2], to.states[3],
       to.states[4], to.states[5], to.states[6], to.states[1]}};
   std::array<std::size_t, 7> counterResult = {{0, 1, 2, 1, 2, 1, 2}};
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( NFAAddCounter )
   for (int i = 0; i < 7; i++) {
     BOOST_CHECK_EQUAL(to.states.at(i)->isMatch, matchResult.at(i));
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'].size(), 1);
-    BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].lock(), next_weakResult.at(i).lock());
+    BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0], next_weakResult.at(i));
     BOOST_CHECK_EQUAL(to.counter[to.states.at(i)], counterResult.at(i));
   }
 }
@@ -58,11 +58,11 @@ BOOST_AUTO_TEST_CASE( TAAddCounter )
   from.states.reserve(3);
 
   for (int i = 0; i < 3; i++) {
-    from.states.push_back(std::make_shared<TAState>());
+    from.states.push_back(new TAState());
   }
 
   std::array<bool, 3> match = {{false, false, true}};
-  std::array<std::weak_ptr<TAState>, 3> next_weak = {{from.states[1], from.states[2], from.states[0]}};
+  std::array<TAState*, 3> next_weak = {{from.states[1], from.states[2], from.states[0]}};
   std::array<std::vector<ClockVariables>, 3> next_reset = {{{}, {0}, {}}};
   std::array<std::vector<Constraint>, 3> next_guard = {{{TimedAutomaton::X(0) >= 1}, {}, {TimedAutomaton::X(0) <= 1}}};
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( TAAddCounter )
   BOOST_REQUIRE_EQUAL(to.initialStates.size(), 1);
 
   std::array<bool, 7> matchResult = {{false, false, true, false, false, true, false}};
-  std::array<std::weak_ptr<TAState>, 7> next_weakResult = 
+  std::array<TAState*, 7> next_weakResult = 
     {{to.states[1], to.states[2], to.states[3],
       to.states[4], to.states[5], to.states[6], to.states[1]}};
   std::array<std::vector<ClockVariables>, 7> next_resetResult = {{next_reset[0], next_reset[1], next_reset[2], 
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE( TAAddCounter )
   for (int i = 0; i < 7; i++) {
     BOOST_CHECK_EQUAL(to.states.at(i)->isMatch, matchResult.at(i));
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'].size(), 1);
-    BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].target.lock(), next_weakResult.at(i).lock());
+    BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].target, next_weakResult.at(i));
     BOOST_CHECK_EQUAL(to.states.at(i)->nextMap['a'][0].resetVars.size(), next_resetResult.at(i).size());
     BOOST_CHECK_EQUAL_COLLECTIONS(to.states.at(i)->nextMap['a'][0].resetVars.begin(),
                                   to.states.at(i)->nextMap['a'][0].resetVars.end(),

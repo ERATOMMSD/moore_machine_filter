@@ -29,12 +29,12 @@ struct NonDeterministicAutomatonState : public AutomatonState {
 };
 
 //! @brief A state of an NFA
-struct NFAState : public NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>> {
-  using Transition = std::weak_ptr<NFAState>;
-  using ParentState = NonDeterministicAutomatonState<unsigned char, std::weak_ptr<NFAState>>;
+struct NFAState : public NonDeterministicAutomatonState<unsigned char, NFAState*> {
+  using Transition = NFAState*;
+  using ParentState = NonDeterministicAutomatonState<unsigned char, NFAState*>;
   using Alphabet = unsigned char;
   using ParentState::ParentState;
-  //  NFAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<std::weak_ptr<NFAState>>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
+  //  NFAState (bool isMatch = false, std::unordered_map<unsigned char, std::vector<NFAState*>> nextMap = {}) : ParentState(isMatch, std::move(nextMap)) {}
 };
 
 struct TATransition;
@@ -49,37 +49,37 @@ struct TAState : public NonDeterministicAutomatonState<unsigned char, TATransiti
 //! @brief A transition of a timed automaton
 struct TATransition {
   //! @brief The pointer to the target state.
-  std::weak_ptr<TAState> target;
+  TAState* target;
   //! @brief The clock variables reset after this transition.
   std::vector<ClockVariables> resetVars;
   //! @brief The guard for this transition.
   std::vector<Constraint> guard;
 
-  void operator=(std::weak_ptr<TAState> p) {
+  void operator=(TAState* p) {
     target = p;
   }
-  std::shared_ptr<TAState> lock() const {
-    return target.lock();
+  operator TAState*() const {
+    return target;
   }
 };
 
 template<class Alphabet, class FinalState>
 struct DeterministicAutomatonState : public AutomatonState {
-  virtual std::shared_ptr<FinalState> next(const Alphabet&) = 0;
+  virtual FinalState* next(const Alphabet&) = 0;
   DeterministicAutomatonState (bool isMatch = false) : AutomatonState(isMatch) {}
 };
 
 struct DFAState : public DeterministicAutomatonState<unsigned char, DFAState> {
-  std::unordered_map<unsigned char, std::weak_ptr<DFAState>> nextMap;
-  DFAState (bool isMatch = false, std::unordered_map<unsigned char, std::weak_ptr<DFAState>> next = {}) : 
+  std::unordered_map<unsigned char, DFAState*> nextMap;
+  DFAState (bool isMatch = false, std::unordered_map<unsigned char, DFAState*> next = {}) : 
     DeterministicAutomatonState<unsigned char, DFAState>(isMatch), nextMap(std::move(next)) {}
 
-  std::shared_ptr<DFAState> next(const unsigned char& c) {
+  DFAState* next(const unsigned char& c) {
     auto it = nextMap.find(c);
     if (it == nextMap.end()) {
-      return std::shared_ptr<DFAState>();
+      return nullptr;
     } else {
-      return it->second.lock();
+      return it->second;
     }
   }
 };
@@ -89,9 +89,9 @@ struct DRTAState;
 struct DRTATransition {
   std::pair<double, bool> upperBound;
   //! @brief The pointer to the target state.
-  std::weak_ptr<DRTAState> target;
+  DRTAState* target;
 
-  void operator=(std::weak_ptr<DRTAState> p) {
+  void operator=(DRTAState* p) {
     target = p;
   }
   bool operator<=(double x) const {
@@ -106,8 +106,8 @@ struct DRTATransition {
   bool operator>=(double x) const {
     return upperBound.first > x || (upperBound.first == x && upperBound.second);
   }
-  std::shared_ptr<DRTAState> lock() {
-    return target.lock();
+  DRTAState* lock() {
+    return target;
   }
 };
 
@@ -119,10 +119,10 @@ struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, d
   DRTAState (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<DRTATransition>> next = {}) : 
     ParentState(isMatch), nextMap(std::move(next)) {}
 
-  std::shared_ptr<DRTAState> next(const std::pair<unsigned char, double>& c) {
+  DRTAState* next(const std::pair<unsigned char, double>& c) {
     auto it = nextMap.find(c.first);
     if (it == nextMap.end()) {
-      return std::shared_ptr<DRTAState>();
+      return nullptr;
     } else {
       // This takes O(log(N)) where N is the size of the partition.
       auto it2 = std::lower_bound(it->second.begin(), it->second.end(), c.second);
@@ -157,7 +157,7 @@ struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, d
 //       nfaNext.reserve(nfaNext.size() + ns->next.at(c).size());
 //       std::vector<std::shared_ptr<NFAState>> tmpNext;
 //       tmpNext.reserve(ns->next.at(c).size());
-//       for (const std::weak_ptr<NFAState> ptr: ns->next.at(c)) {
+//       for (const NFAState* ptr: ns->next.at(c)) {
 //         if (!ptr.expired()) {
 //           tmpNext.push_back(ptr.lock());
 //         }
@@ -187,9 +187,9 @@ struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, d
 template<class State>
 struct Automaton {
   //! @brief The states of this automaton.
-  std::vector<std::shared_ptr<State>> states;
+  std::vector<State*> states;
   //! @brief The initial states of this automaton.
-  std::vector<std::shared_ptr<State>> initialStates;
+  std::vector<State*> initialStates;
 
   //! @brief Returns the number of the states.
   inline std::size_t stateSize() const {return states.size ();}
@@ -207,16 +207,16 @@ struct Automaton {
 
 // Probably shared_ptr based implementation is better
 struct tmpNFA {
-  std::list<std::shared_ptr<NFAState>> states;
-  std::list<std::shared_ptr<NFAState>> initStates;
+  std::list<NFAState*> states;
+  std::list<NFAState*> initStates;
   // std::list<std::shared_ptr<NFAState>> states;
   // std::list<const std::shared_ptr<NFAState>> initStates;
   tmpNFA () {}
   tmpNFA (const std::string cs) {
-    states.push_back(std::make_shared<NFAState>(false));
-    states.push_back(std::make_shared<NFAState>(true));
+    states.push_back(new NFAState(false));
+    states.push_back(new NFAState(true));
     for (auto c : cs) {
-      states.front()->nextMap[c] = { std::weak_ptr<NFAState>(states.back()) };
+      states.front()->nextMap[c] = { (NFAState*)(states.back()) };
     }
     initStates = { states.front() };
   }
@@ -242,7 +242,7 @@ using NFA = Automaton<NFAState>;
 //       std::vector<std::shared_ptr<NFAState>> nextConf;
 //       for (auto conf: currentConf) {
 //         std::vector<std::shared_ptr<NFAState>> tmpNext;
-//         for (const std::weak_ptr<NFAState> ptr: conf->next.at(c)) {
+//         for (const NFAState* ptr: conf->next.at(c)) {
 //           if (!ptr.expired()) {
 //             tmpNext.push_back(ptr.lock());
 //           }
@@ -269,24 +269,24 @@ struct TimedAutomaton : public Automaton<TAState> {
     @param [out] dest The destination of the deep copy.
     @param [out] old2new The mapping from the original state to the corresponding new state.
    */
-  void deepCopy(TimedAutomaton& dest, std::unordered_map<TAState*, std::shared_ptr<TAState>> &old2new) const {
+  void deepCopy(TimedAutomaton& dest, std::unordered_map<TAState*, TAState*> &old2new) const {
     // copy states
     old2new.reserve(stateSize());
     dest.states.reserve(stateSize());
     for (auto oldState: states) {
-      dest.states.emplace_back(std::make_shared<TAState>(*oldState));
-      old2new[oldState.get()] = dest.states.back();
+      dest.states.emplace_back(new TAState(*oldState));
+      old2new[oldState] = dest.states.back();
     }
     // copy initial states
     dest.initialStates.reserve(initialStates.size());
     for (auto oldInitialState: initialStates) {
-      dest.initialStates.emplace_back(old2new[oldInitialState.get()]);
+      dest.initialStates.emplace_back(old2new[oldInitialState]);
     }
     // modify dest of transitions
     for (auto &state: dest.states) {
       for (auto &edges: state->nextMap) {
         for (auto &edge: edges.second) {
-          auto oldTarget = edge.target.lock().get();
+          auto oldTarget = edge.target;
           edge.target = old2new[oldTarget];
         }
       }
@@ -306,7 +306,7 @@ struct TimedAutomaton : public Automaton<TAState> {
     std::vector<std::pair<TAState*, std::valarray<double>>> CStates;
     CStates.reserve(initialStates.size());
     for (const auto& s: initialStates) {
-      CStates.emplace_back(s.get(), std::valarray<double>(0.0, clockSize()));
+      CStates.emplace_back(s, std::valarray<double>(0.0, clockSize()));
     }
     for (std::size_t i = 0; i < w.size(); i++) {
       std::vector<std::pair<TAState*, std::valarray<double>>> NextStates;
@@ -325,7 +325,7 @@ struct TimedAutomaton : public Automaton<TAState> {
                 return g.satisfy(config.second[g.x]);
               })) {
             auto tmpConfig = config;
-            tmpConfig.first = edge.target.lock().get();
+            tmpConfig.first = edge.target;
             if (tmpConfig.first) {
               for (ClockVariables x: edge.resetVars) {
                 tmpConfig.second[x] = 0; 

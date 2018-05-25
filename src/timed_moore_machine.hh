@@ -6,13 +6,13 @@
 #include "moore_machine.hh"
 
 // Over-approximate a timed automaton by a real-time automaton
-void constructNexts(const std::shared_ptr<DRTAState> &s,
-                    std::unordered_map<std::shared_ptr<DRTAState>, std::unordered_multimap<std::shared_ptr<TAState>, DBM>> &toOldStates, 
-                    boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> &nexts);
+void constructNexts(DRTAState* s,
+                    std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
+                    boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts);
 
-void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> &nexts,
-                     const std::unordered_multimap<std::shared_ptr<TAState>, DBM> &initConfs,
-                     std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> &nextLineared);
+void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts,
+                     const std::unordered_multimap<TAState*, DBM> &initConfs,
+                     std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> &nextLineared);
 
 // TAWithCounter -> TimedMooreMachine
 template<int BufferSize>
@@ -20,23 +20,23 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
 {
   // S_{old} -> Int -> S_{new}
   // Q = S \times Z(X)
-  boost::unordered_map<std::vector<std::pair<std::shared_ptr<TAState>, DBM::Tuple>>, std::shared_ptr<DRTAState>> toNewState;
-  std::unordered_map<std::shared_ptr<DRTAState>, std::unordered_multimap<std::shared_ptr<TAState>, DBM>> toOldStates;
-  std::vector<std::shared_ptr<DRTAState>> currStates;
+  boost::unordered_map<std::vector<std::pair<TAState*, DBM::Tuple>>, DRTAState*> toNewState;
+  std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> toOldStates;
+  std::vector<DRTAState*> currStates;
 
-  const auto addNewState = [&](const std::unordered_multimap<std::shared_ptr<TAState>, DBM> &s) -> std::shared_ptr<DRTAState> {
-    auto newState = std::make_shared<DRTAState>(std::any_of(s.begin(), s.end(), [](std::pair<std::shared_ptr<TAState>, DBM> ps) {
+  const auto addNewState = [&](const std::unordered_multimap<TAState*, DBM> &s) -> DRTAState* {
+    auto newState = new DRTAState(std::any_of(s.begin(), s.end(), [](std::pair<TAState*, DBM> ps) {
           // isMatch
           return ps.first->isMatch;
         }));
-    std::vector<std::pair<std::shared_ptr<TAState>, DBM::Tuple>> s_tuple;
+    std::vector<std::pair<TAState*, DBM::Tuple>> s_tuple;
     for (auto &p: s) {
       s_tuple.emplace_back(p.first, p.second.toTuple());
     }
     std::sort(s_tuple.begin(), s_tuple.end());
     toNewState[s_tuple] = newState;
     toOldStates[newState] = s;
-    to.counter[newState] = std::accumulate(s.begin(), s.end(), 0, [&](const int x, const std::pair<std::shared_ptr<TAState>, DBM> ps) -> int {
+    to.counter[newState] = std::accumulate(s.begin(), s.end(), 0, [&](const int x, const std::pair<TAState*, DBM> ps) -> int {
         auto it = from.counter.find(ps.first);
         assert(it != from.counter.end());
         if (it->second == BufferSize) {
@@ -53,7 +53,7 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
   };
 
   // add initial state
-  std::unordered_multimap<std::shared_ptr<TAState>, DBM> initConfs;
+  std::unordered_multimap<TAState*, DBM> initConfs;
   {
     DBM initZone = DBM::zero(numOfVariables + 1);
     initZone.M = M;
@@ -65,16 +65,16 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
   }
 
   while (!currStates.empty()) {
-    std::vector<std::shared_ptr<DRTAState>> prevStates = std::move(currStates);
+    std::vector<DRTAState*> prevStates = std::move(currStates);
     currStates.clear();
     for (auto s: prevStates) {
       // merge the next unordered_map of each DRTAState
-      boost::unordered_map<unsigned char, std::vector<std::tuple<std::shared_ptr<TAState>, DBM, Bounds, Bounds>>> nexts;
+      boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
 
       // NOTE: HERE IS THE DIFFICULT POINT!!!!
       constructNexts(s, toOldStates, nexts);
 
-      std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<std::shared_ptr<TAState>, DBM>, Bounds>>> nextLineared;
+      std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> nextLineared;
       linearlizeNexts(nexts, initConfs, nextLineared);
 
       // add a transition to the next DTRAState
@@ -82,7 +82,7 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
         s->nextMap[nextPair.first].reserve(nextPair.second.size());
 
         for (auto targetPair: nextPair.second) {
-          std::vector<std::pair<std::shared_ptr<TAState>, DBM::Tuple>> s_tuple;
+          std::vector<std::pair<TAState*, DBM::Tuple>> s_tuple;
           for (auto &p: targetPair.first) {
             s_tuple.emplace_back(p.first, p.second.toTuple());
           }

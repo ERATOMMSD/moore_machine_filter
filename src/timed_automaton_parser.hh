@@ -318,10 +318,10 @@ void convBoostTA(const BoostTimedAutomaton &BoostTA, TimedAutomaton &TA)
   TA.initialStates.clear();
   TA.maxConstraints.clear();
   auto vertex_range = boost::vertices(BoostTA);
-  std::unordered_map<BoostTimedAutomaton::vertex_descriptor, std::shared_ptr<TAState>> stateConvMap;
+  std::unordered_map<BoostTimedAutomaton::vertex_descriptor, TAState*> stateConvMap;
   for (auto first = vertex_range.first, last = vertex_range.second; first != last; ++first) {
     BoostTimedAutomaton::vertex_descriptor v = *first;
-    stateConvMap[v] = std::make_shared<TAState>(boost::get(&BoostTAState::isMatch, BoostTA, v));
+    stateConvMap[v] = new TAState(boost::get(&BoostTAState::isMatch, BoostTA, v));
     TA.states.emplace_back(stateConvMap[v]);
     if (boost::get(&BoostTAState::isInit, BoostTA, v)) {
       TA.initialStates.emplace_back(stateConvMap[v]);
@@ -350,10 +350,10 @@ void convBoostTA(const BoostTimedAutomaton &BoostTA, NFA &TA)
   TA.states.clear();
   TA.initialStates.clear();
   auto vertex_range = boost::vertices(BoostTA);
-  std::unordered_map<BoostTimedAutomaton::vertex_descriptor, std::shared_ptr<NFAState>> stateConvMap;
+  std::unordered_map<BoostTimedAutomaton::vertex_descriptor, NFAState*> stateConvMap;
   for (auto first = vertex_range.first, last = vertex_range.second; first != last; ++first) {
     BoostTimedAutomaton::vertex_descriptor v = *first;
-    stateConvMap[v] = std::make_shared<NFAState>(boost::get(&BoostTAState::isMatch, BoostTA, v));
+    stateConvMap[v] = new NFAState(boost::get(&BoostTAState::isMatch, BoostTA, v));
     TA.states.emplace_back(stateConvMap[v]);
     if (boost::get(&BoostTAState::isInit, BoostTA, v)) {
       TA.initialStates.emplace_back(stateConvMap[v]);
