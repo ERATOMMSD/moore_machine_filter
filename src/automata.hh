@@ -124,6 +124,7 @@ struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, d
     if (it == nextMap.end()) {
       return std::shared_ptr<DRTAState>();
     } else {
+      // This takes O(log(N)) where N is the size of the partition.
       auto it2 = std::lower_bound(it->second.begin(), it->second.end(), c.second);
       return it2->lock();
     }
