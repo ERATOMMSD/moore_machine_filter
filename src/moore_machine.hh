@@ -27,10 +27,50 @@ constexpr inline std::pair<unsigned char, double> mask(std::pair<unsigned char, 
   return std::make_pair(maskChar<unsigned char>, c.second);
 }
 
+template<class T, int BufferSize>
+class ConstQueue 
+{
+private:
+  std::array<T, BufferSize> data;
+  std::size_t fpos = 0, bpos = -1;
+  std::size_t shift_front () {
+    return fpos = (fpos + 1) % BufferSize;
+  }
+  std::size_t shift_back () {
+    return bpos = (bpos + 1) % BufferSize;
+  }
+public:
+  using value_type = T;
+  using reference = T&;
+  using const_reference = const T&;
+  using size_type = std::size_t;
+  reference front() {
+    return data[fpos];
+  }
+  const_reference front() const {
+    return data[fpos];
+  }
+  reference back() {
+    return data[bpos];
+  }
+  const_reference back() const {
+    return data[bpos];
+  }
+  void push_back(const T& x) {
+    data[shift_back()] = std::move(x);
+  }
+  void push_back(T&& x) {
+    data[shift_back()] = std::move(x);
+  }
+  void pop_front() {
+    shift_front();
+  }
+};
+
 template<int BufferSize, class Alphabet, class State>
 struct MooreMachine : public Automaton<State> {
   std::unordered_map<State*, std::size_t> counter;
-  std::queue<Alphabet, std::vector<Alphabet>> charBuffer;
+  std::queue<Alphabet, ConstQueue<Alphabet, BufferSize>> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
   State* currentState;
   MooreMachine() {
