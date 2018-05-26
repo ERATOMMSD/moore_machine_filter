@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <boost/fusion/include/std_pair.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/program_options.hpp>
 #include <boost/exception/diagnostic_information.hpp> 
 
@@ -19,15 +21,25 @@ static inline int getOne(FILE* file, unsigned char &c, bool) {
 }
 
 static inline int getOne(FILE* file, std::pair<unsigned char, double> &p, bool isAbsTime = false) {
+  char cstr[100];
   static double last_abs_time = 0;
+
+  if (!fgets(cstr, 100, file)) {
+    return EOF;
+  }
+  std::string str = std::string(cstr, 100);
+
+  boost::spirit::qi::phrase_parse(str.begin(), str.end(),
+                                  (boost::spirit::qi::char_ >> boost::spirit::qi::double_), boost::spirit::qi::blank, p);
+
   if (!isAbsTime) {
-    return fscanf(file, " %c %lf\n", &p.first, &p.second);
+    return 2;
   } else {
-    double abs_time;
-    const auto ret = fscanf(file, " %c %lf\n", &p.first, &abs_time);
-    p.second = abs_time - last_abs_time;
+    const double abs_time = p.second;
+    p.second -= last_abs_time;
     last_abs_time = abs_time;
-    return ret;
+
+    return 2;
   }
 }
 
