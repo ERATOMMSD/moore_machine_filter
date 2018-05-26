@@ -30,7 +30,7 @@ constexpr inline std::pair<unsigned char, double> mask(std::pair<unsigned char, 
 template<int BufferSize, class Alphabet, class State>
 struct MooreMachine : public Automaton<State> {
   std::unordered_map<State*, std::size_t> counter;
-  std::queue<Alphabet> charBuffer;
+  std::queue<Alphabet, std::vector<Alphabet>> charBuffer;
   BitBuffer<BufferSize> bitBuffer;
   State* currentState;
   MooreMachine() {
