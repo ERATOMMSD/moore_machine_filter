@@ -21,13 +21,13 @@ static inline int getOne(FILE* file, unsigned char &c, bool) {
 }
 
 static inline int getOne(FILE* file, std::pair<unsigned char, double> &p, bool isAbsTime = false) {
-  char cstr[100];
+  std::array<char, 100> str;
   static double last_abs_time = 0;
 
-  if (!fgets(cstr, 100, file)) {
+  if (!fgets(str.data(), 100, file)) {
     return EOF;
   }
-  std::string str = std::string(cstr, 100);
+  //  std::string str = std::string(cstr, 100);
 
   boost::spirit::qi::phrase_parse(str.begin(), str.end(),
                                   (boost::spirit::qi::char_ >> boost::spirit::qi::double_), boost::spirit::qi::blank, p);
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
     automatonStream >> TA;
     MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAState> filterMachine;
     constructFilter<TAState>(TA, filterMachine);
-    filter(filterMachine, stdin, stdout, isAbsTime);
+    filter(filterMachine, fopen("/tmp/monaa.input", "r"), stdout, isAbsTime);
   } else {
     // parse NFA
     NFA A;
