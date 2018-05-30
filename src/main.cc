@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
     automatonStream >> TA;
     MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAStateWithCounter> filterMachine;
     constructFilter<TAState>(TA, filterMachine);
-    filter(filterMachine, fopen("/tmp/monaa.input", "r"), stdout, isAbsTime);
+    filter(filterMachine, stdin, stdout, isAbsTime);
   } else {
     // parse NFA
     NFA A;
