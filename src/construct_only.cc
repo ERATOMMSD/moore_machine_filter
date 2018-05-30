@@ -15,7 +15,7 @@
 using namespace boost::program_options;
 
 template<int BufferSize>
-void toMooreMachine(const NFA &, NFAWithCounter<BufferSize> &counter, MooreMachine<BufferSize, unsigned char, DFAState> &filterMachine) {
+void toMooreMachine(const NFA &, NFAWithCounter<BufferSize> &counter, MooreMachine<BufferSize, unsigned char, DFAStateWithCounter> &filterMachine) {
   toMooreMachine(counter, filterMachine);
 }
 
@@ -107,14 +107,14 @@ int main(int argc, char *argv[])
     TimedAutomaton TA;
     // parse TA
     automatonStream >> TA;
-    MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAState> filterMachine;
+    MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAStateWithCounter> filterMachine;
     constructFilter<TAState>(TA, filterMachine);
     std::cout << filterMachine.states.size() << std::endl;
   } else {
     // parse NFA
     NFA A;
     automatonStream >> A;
-    MooreMachine<BUFFER_SIZE, unsigned char, DFAState> filterMachine;
+    MooreMachine<BUFFER_SIZE, unsigned char, DFAStateWithCounter> filterMachine;
     constructFilter<NFAState>(A, filterMachine);
     std::cout << filterMachine.states.size() << std::endl;
   }

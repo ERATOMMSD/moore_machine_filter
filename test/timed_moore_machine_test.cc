@@ -23,8 +23,8 @@ BOOST_AUTO_TEST_CASE( constructNexts1 )
   D.value(1, 0) = Bounds{5, false};
   D.value(0, 1) = Bounds{-3, false};
 
-  DRTAState* s = new DRTAState();
-  std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> toOldStates;
+  DRTAStateWithCounter* s = new DRTAStateWithCounter();
+  std::unordered_map<DRTAStateWithCounter*, std::unordered_multimap<TAState*, DBM>> toOldStates;
   toOldStates[s].emplace(std::make_pair(states[0], D));
   boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
 
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(filterTest)
   TimedAutomaton from;
   constexpr std::size_t bufferSize = 2;
   TAWithCounter<bufferSize> to;
-  MooreMachine<bufferSize, Alphabet, DRTAState> filter;
+  MooreMachine<bufferSize, Alphabet, DRTAStateWithCounter> filter;
 
   from.states.reserve(3);
 

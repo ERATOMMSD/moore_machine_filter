@@ -20,11 +20,34 @@ static inline int getOne(FILE* file, unsigned char &c, bool) {
   return fscanf(file, " %c\n", &c);
 }
 
+// fgets without file lock/unlock. We have to lock/unlock manually.
+static inline char *fgets_unsafe(char * chr, int n, FILE *stream) {
+  char * init_chr = chr;
+  int c;
+  char * ret = nullptr;
+  if (--n <= 0) {
+    return nullptr;
+  }
+  while ((c = getc_unlocked(stream)) != EOF) {
+    ret = init_chr;
+    if (c == '\n') {
+      *chr = '\0';
+      return init_chr;
+    }
+    *chr = c;
+    chr++;
+    if (--n <= 0) {
+      *chr = '\0';
+      return init_chr;
+    }
+  }
+  return ret;
+}
+
 static inline int getOne(FILE* file, std::pair<unsigned char, double> &p, bool isAbsTime = false) {
   std::array<char, 100> str;
   static double last_abs_time = 0;
-
-  if (!fgets(str.data(), 100, file)) {
+  if (!fgets_unsafe(str.data(), 100, file)) {
     return EOF;
   }
   //  std::string str = std::string(cstr, 100);
@@ -73,7 +96,7 @@ static inline int putOne(FILE* file, const std::pair<unsigned char, double> &p, 
 }
 
 template<int BufferSize>
-void toMooreMachine(const NFA &, NFAWithCounter<BufferSize> &counter, MooreMachine<BufferSize, unsigned char, DFAState> &filterMachine) {
+void toMooreMachine(const NFA &, NFAWithCounter<BufferSize> &counter, MooreMachine<BufferSize, unsigned char, DFAStateWithCounter> &filterMachine) {
   toMooreMachine(counter, filterMachine);
 }
 
@@ -92,6 +115,7 @@ void constructFilter(Autom &TA, MooreMachine<BufferSize, Alphabet, FiltState> &f
 
 template<int BufferSize, class Alphabet, class State>
 void filter(MooreMachine<BufferSize, Alphabet, State> &A, FILE *fin, FILE* fout, bool isAbsTime) {
+  flockfile(fin);
   Alphabet c;
   std::size_t counter = 0;
   while(getOne(fin, c, isAbsTime) != EOF) {
@@ -111,6 +135,7 @@ void filter(MooreMachine<BufferSize, Alphabet, State> &A, FILE *fin, FILE* fout,
     putOne(fout, A.feed(maskChar<Alphabet>), isAbsTime);
     finCounter--;
   }
+  funlockfile(fin);
 }
 
 void operator>>(std::ifstream &stream, TimedAutomaton &A) {
@@ -188,14 +213,14 @@ int main(int argc, char *argv[])
     TimedAutomaton TA;
     // parse TA
     automatonStream >> TA;
-    MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAState> filterMachine;
+    MooreMachine<BUFFER_SIZE, std::pair<unsigned char, double>, DRTAStateWithCounter> filterMachine;
     constructFilter<TAState>(TA, filterMachine);
     filter(filterMachine, fopen("/tmp/monaa.input", "r"), stdout, isAbsTime);
   } else {
     // parse NFA
     NFA A;
     automatonStream >> A;
-    MooreMachine<BUFFER_SIZE, unsigned char, DFAState> filterMachine;
+    MooreMachine<BUFFER_SIZE, unsigned char, DFAStateWithCounter> filterMachine;
     constructFilter<NFAState>(A, filterMachine);
     filter(filterMachine, stdin, stdout, isAbsTime);
   }

@@ -84,6 +84,12 @@ struct DFAState : public DeterministicAutomatonState<unsigned char, DFAState> {
   }
 };
 
+struct DFAStateWithCounter : public DFAState {
+  std::size_t counter;
+  DFAStateWithCounter (bool isMatch = false, std::unordered_map<unsigned char, DFAState*> next = {}) : 
+    DFAState(isMatch, std::move(next)) {}
+};
+
 struct DRTAState;
 //! @brief A transition of a deterministic real-time automaton
 struct DRTATransition {
@@ -139,6 +145,11 @@ struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, d
   }
 };
 
+struct DRTAStateWithCounter : public DRTAState {
+  std::size_t counter;
+  DRTAStateWithCounter (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<DRTATransition>> next = {}) : 
+    DRTAState(isMatch, std::move(next)) {}
+};
 
 // struct DFAState {
 //   bool isMatch;

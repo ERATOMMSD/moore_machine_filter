@@ -6,8 +6,8 @@
 #include "moore_machine.hh"
 
 // Over-approximate a timed automaton by a real-time automaton
-void constructNexts(DRTAState* s,
-                    std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
+void constructNexts(DRTAStateWithCounter* s,
+                    std::unordered_map<DRTAStateWithCounter*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
                     boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts);
 
 void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts,
@@ -16,16 +16,16 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
 
 // TAWithCounter -> TimedMooreMachine
 template<int BufferSize>
-void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M, const std::size_t numOfVariables, MooreMachine<BufferSize, std::pair<unsigned char, double>, DRTAState> &to) 
+void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M, const std::size_t numOfVariables, MooreMachine<BufferSize, std::pair<unsigned char, double>, DRTAStateWithCounter> &to) 
 {
   // S_{old} -> Int -> S_{new}
   // Q = S \times Z(X)
-  boost::unordered_map<std::vector<std::pair<TAState*, DBM::Tuple>>, DRTAState*> toNewState;
-  std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> toOldStates;
-  std::vector<DRTAState*> currStates;
+  boost::unordered_map<std::vector<std::pair<TAState*, DBM::Tuple>>, DRTAStateWithCounter*> toNewState;
+  std::unordered_map<DRTAStateWithCounter*, std::unordered_multimap<TAState*, DBM>> toOldStates;
+  std::vector<DRTAStateWithCounter*> currStates;
 
-  const auto addNewState = [&](const std::unordered_multimap<TAState*, DBM> &s) -> DRTAState* {
-    auto newState = new DRTAState(std::any_of(s.begin(), s.end(), [](std::pair<TAState*, DBM> ps) {
+  const auto addNewState = [&](const std::unordered_multimap<TAState*, DBM> &s) -> DRTAStateWithCounter* {
+    auto newState = new DRTAStateWithCounter(std::any_of(s.begin(), s.end(), [](std::pair<TAState*, DBM> ps) {
           // isMatch
           return ps.first->isMatch;
         }));
@@ -36,7 +36,7 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
     std::sort(s_tuple.begin(), s_tuple.end());
     toNewState[s_tuple] = newState;
     toOldStates[newState] = s;
-    to.counter[newState] = std::accumulate(s.begin(), s.end(), 0, [&](const int x, const std::pair<TAState*, DBM> ps) -> int {
+    newState->counter = std::accumulate(s.begin(), s.end(), 0, [&](const int x, const std::pair<TAState*, DBM> ps) -> int {
         auto it = from.counter.find(ps.first);
         assert(it != from.counter.end());
         if (it->second == BufferSize) {
@@ -65,10 +65,10 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
   }
 
   while (!currStates.empty()) {
-    std::vector<DRTAState*> prevStates = std::move(currStates);
+    std::vector<DRTAStateWithCounter*> prevStates = std::move(currStates);
     currStates.clear();
     for (auto s: prevStates) {
-      // merge the next unordered_map of each DRTAState
+      // merge the next unordered_map of each DRTAStateWithCounter
       boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nexts;
 
       // NOTE: HERE IS THE DIFFICULT POINT!!!!

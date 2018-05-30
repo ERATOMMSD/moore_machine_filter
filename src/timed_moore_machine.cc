@@ -1,7 +1,7 @@
 #include "timed_moore_machine.hh"
 
-void constructNexts(DRTAState *s,
-                    std::unordered_map<DRTAState*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
+void constructNexts(DRTAStateWithCounter *s,
+                    std::unordered_map<DRTAStateWithCounter*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
                     boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts) 
 {
   nexts.clear();

@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
 {
   constexpr std::size_t bufferSize = 2;
   NFAWithCounter<bufferSize> from;
-  MooreMachine<bufferSize, unsigned char, DFAState> to;
+  MooreMachine<bufferSize, unsigned char, DFAStateWithCounter> to;
 
   from.states.reserve(4);
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( toMooreMachine1 )
 
   for (int i = 0; i < 2; i++) {
     BOOST_CHECK_EQUAL(to.states.at(i)->isMatch, matchResult.at(i));
-    BOOST_CHECK_EQUAL(to.counter[to.states.at(i)], counterResult.at(i));
+    BOOST_CHECK_EQUAL(to.states.at(i)->counter, counterResult.at(i));
   }
 
   BOOST_CHECK_EQUAL(to.states.at(0)->next('a'), to.states.at(1));
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( filter1 )
   constexpr std::size_t bufferSize = 2;
   NFA nfa;
   NFAWithCounter<bufferSize> nfaCounter;
-  MooreMachine<bufferSize, unsigned char, DFAState> mooreFilter;
+  MooreMachine<bufferSize, unsigned char, DFAStateWithCounter> mooreFilter;
 
   nfa.states.reserve(4);
 
