@@ -316,4 +316,47 @@ BOOST_AUTO_TEST_CASE(filterTest)
                                 outputTimedWordExpected.begin(), outputTimedWordExpected.end());
 }
 
+BOOST_AUTO_TEST_CASE(constructLoopTest)
+{
+  using Alphabet = std::pair<unsigned char, double>;
+
+  TimedAutomaton from;
+  constexpr std::size_t bufferSize = 2;
+  TAWithCounter<bufferSize> to;
+  MooreMachine<bufferSize, Alphabet, DRTAStateWithCounter> filter;
+
+  constexpr std::size_t fromStateSize = 3;
+
+  from.states.reserve(fromStateSize);
+
+  for (std::size_t i = 0; i < fromStateSize; i++) {
+    from.states.push_back(new TAState());
+  }
+
+  std::array<bool, fromStateSize> match = {{false, false, true}};
+  for (std::size_t i = 0; i < fromStateSize; i++) {
+    from.states[i]->isMatch = match[i];
+  }
+
+  from.states[0]->nextMap['a'] = {{from.states[1], {}, {TimedAutomaton::X(0) < 1}}};
+
+  std::array<TAState*, 2> next_weak = {{from.states[1], from.states[2]}};
+  std::array<std::vector<ClockVariables>, 2> next_reset = {{{}, {}}};
+  std::array<std::vector<Constraint>, 2> next_guard = {{{}, {}}};
+  std::array<unsigned char, 2> next_char = {{'a', 'b'}};
+
+  for (int i = 0; i < 2; i++) {
+    from.states[1]->nextMap[next_char[i]] = {{next_weak[i], next_reset[i], next_guard[i]}};
+  }
+
+  from.initialStates = {from.states[0]};
+  from.maxConstraints = {1};
+
+  toAutomatonWithCounter(from, to);
+
+  BOOST_REQUIRE_EQUAL(to.states.size(), 5);
+
+  toTimedMooreMachine(to, Bounds{1, true}, 1, filter);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

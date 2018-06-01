@@ -104,8 +104,7 @@ struct DRTATransition {
     return upperBound.first <= x;
   }
   bool operator<(double x) const {
-    static const auto op = upperBound.second ? lt : le;
-    return op(upperBound.first, x);
+    return upperBound.first < x || (upperBound.first == x && !upperBound.second);
   }
   bool operator>(double x) const {
     return upperBound.first > x;
@@ -115,13 +114,6 @@ struct DRTATransition {
   }
   DRTAState* lock() {
     return target;
-  }
-private:
-  static bool lt (const double a, const double b) {
-    return a < b;
-  }
-  static bool le (const double a, const double b) {
-    return a <= b;
   }
 };
 

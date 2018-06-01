@@ -52,11 +52,13 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
   boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nextsLower = nexts;
   boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> nextsUpper = nexts;
 
+  // OPTIMIZATION: We can optimize the number of states by merging the smaller states to the larger one if the interval is included.
   for (auto& n: nextsLower) {
     std::sort(n.second.begin(), n.second.end(), [](const std::tuple<TAState*, DBM, Bounds, Bounds> &x,
                                                    const std::tuple<TAState*, DBM, Bounds, Bounds> &y) {
                 return std::get<2>(x) > std::get<2>(y);
               });
+    n.second.erase(std::unique(n.second.begin(), n.second.end()), n.second.end());
     for (auto &l: n.second) {
       std::get<2>(l).first = -std::get<2>(l).first;
     }
@@ -66,6 +68,7 @@ void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::
                                                    const std::tuple<TAState*, DBM, Bounds, Bounds> &y) {
                 return std::get<3>(x) < std::get<3>(y);
               });
+    n.second.erase(std::unique(n.second.begin(), n.second.end()), n.second.end());
   }
   for (const auto &lower: nextsLower) {
     const unsigned char c = lower.first;
