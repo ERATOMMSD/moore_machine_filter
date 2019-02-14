@@ -1,20 +1,39 @@
 #pragma once
+/*!
+  @file timed_moore_machine.hh
+  @brief Functions for Moore machine construction from timed automata
+ */
 #include <boost/unordered_set.hpp>
 
 // (setq flycheck-clang-language-standard "c++14")
 #include "dbm.hh"
 #include "moore_machine.hh"
 
-// Over-approximate a timed automaton by a real-time automaton
+/*!
+ @brief Over-approximate a timed automaton by a real-time automaton
+ @param [in] s Source state of the transition
+ @param [in] toOldStates Mapping from a state s of the timed Moore machine to the set of pairs (q, Z) of a state q of the original TA and a zone Z.
+ @param [out] nexts Generated transition of the timed Moore machine
+ @todo check the meaning of the Bounds.
+*/
 void constructNexts(DRTAStateWithCounter* s,
                     std::unordered_map<DRTAStateWithCounter*, std::unordered_multimap<TAState*, DBM>> &toOldStates, 
                     boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts);
 
+/*!
+  @todo I forgot if the Bound is upper or lower bound.
+ */
 void linearlizeNexts(const boost::unordered_map<unsigned char, std::vector<std::tuple<TAState*, DBM, Bounds, Bounds>>> &nexts,
                      const std::unordered_multimap<TAState*, DBM> &initConfs,
                      std::unordered_map<unsigned char, std::vector<std::pair<std::unordered_multimap<TAState*, DBM>, Bounds>>> &nextLineared);
 
-// TAWithCounter -> TimedMooreMachine
+/*!
+ @brief Construct timed Moore machine from TA with counter
+ @param [in] from Input timed automaton
+ @param [in] M Maximum coefficient in from
+ @param [in] numOfVariables Number of variables in from
+ @param [out] to Constructed timed Moore machine
+*/
 template<int BufferSize>
 void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M, const std::size_t numOfVariables, MooreMachine<BufferSize, std::pair<unsigned char, double>, DRTAStateWithCounter> &to) 
 {

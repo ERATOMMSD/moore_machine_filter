@@ -2,6 +2,9 @@
 
 #include "automata.hh"
 
+/*!
+  @brief Automaton with counter
+ */
 template<class T, int BufferSize>
 struct AutomatonWithCounter : public Automaton<T> {
   std::unordered_map<T*, std::size_t> counter;

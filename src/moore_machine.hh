@@ -67,18 +67,39 @@ public:
   }
 };
 
+/*!
+  @brief Moore Machine (both untimed and timed)
+ */
 template<int BufferSize, class Alphabet, class State>
 struct MooreMachine : public Automaton<State> {
   //  std::unordered_map<State*, std::size_t> counter;
+  //! @brief Buffer for the read characters
   std::queue<Alphabet, ConstQueue<Alphabet, BufferSize>> charBuffer;
+  /*! 
+    @brief Buffer for the pass/mask flag
+
+    - true :: pass
+    - false :: mask
+  */
   BitBuffer<BufferSize> bitBuffer;
+  //! @brief Current state of the Moore machine
   State* currentState;
+  /*!
+    @brief Constructor
+    @note This function initialize the buffer.
+   */
   MooreMachine() {
     for (int i = 0; i < BufferSize; i++) {
       charBuffer.push(maskChar<Alphabet>);
     }
   }
 
+  /*!
+    @brief Consumes one character and returns the poped character
+    @param [in] c The current character
+    @retval The masked or unmasked character.
+    @note We assume that the number of the initial states is one.
+   */
   Alphabet feed(Alphabet c) {
     currentState = reinterpret_cast<State*>(currentState->next(c));
     if (!currentState) {

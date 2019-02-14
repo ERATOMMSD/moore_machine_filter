@@ -121,10 +121,14 @@ struct DRTATransition {
 struct DRTAState : public DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState> {
   using ParentState = DeterministicAutomatonState<std::pair<unsigned char, double>, DRTAState>;
   using Alphabet = std::pair<unsigned char, double>;
+  //! @note the vector must be sorted
   boost::unordered_map<unsigned char, std::vector<DRTATransition>> nextMap;
   DRTAState (bool isMatch = false, boost::unordered_map<unsigned char, std::vector<DRTATransition>> next = {}) : 
     ParentState(isMatch), nextMap(std::move(next)) {}
 
+  /*!
+    @brief Compute the next state
+  */
   DRTAState* next(const std::pair<unsigned char, double>& c) {
     auto it = nextMap.find(c.first);
     if (it == nextMap.end()) {
@@ -195,6 +199,9 @@ struct DRTAStateWithCounter : public DRTAState {
 //   std::array<DFAState*, CHAR_MAX> nextArray = {};
 // };
 
+/*!
+  @brief An automaton
+ */
 template<class State>
 struct Automaton {
   //! @brief The states of this automaton.

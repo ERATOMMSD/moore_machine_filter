@@ -2,6 +2,9 @@
 
 #include <bitset>
 
+/*
+ @brief Boolean buffer
+ */
 template <int BufferSize>
 struct BitBuffer {
   std::bitset<BufferSize> bitBuffer;

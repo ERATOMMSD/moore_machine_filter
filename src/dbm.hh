@@ -29,8 +29,11 @@ namespace std {
 };
 
 #include <eigen3/Eigen/Core>
-//! @TODO configure include directory for eigen
+//! @todo configure include directory for eigen
 
+/*!
+  @brief A Difference Bounded Matrix (DBM)
+ */
 struct DBM {
   using Tuple = std::tuple<std::vector<Bounds>,Bounds>;
   Eigen::Matrix<Bounds, Eigen::Dynamic, Eigen::Dynamic> value;

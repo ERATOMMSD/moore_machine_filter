@@ -10,6 +10,11 @@
 #include "moore_machine.hh"
 #include "timed_moore_machine.hh"
 
+/*!
+  @file main.cc
+  @brief The entry of file
+*/
+
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 10
 #endif
@@ -106,6 +111,11 @@ void toMooreMachine(const TimedAutomaton &TA, const TAWithCounter<BufferSize> co
   toTimedMooreMachine(counter, M, TA.clockSize(), filterMachine);
 }
 
+/*!
+  @brief Construct a Moore machine filter (both untimed and timed)
+  @param [in] TA Input automaton
+  @param [out] filterMachine generated Moore machine filter
+ */
 template<class State, class Autom, int BufferSize, class Alphabet, class FiltState>
 void constructFilter(Autom &TA, MooreMachine<BufferSize, Alphabet, FiltState> &filterMachine) {
   AutomatonWithCounter<State, BufferSize> counter;
