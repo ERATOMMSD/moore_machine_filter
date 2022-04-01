@@ -87,6 +87,8 @@ void toTimedMooreMachine(const TAWithCounter<BufferSize> &from, const Bounds &M,
             s_tuple.emplace_back(p.first, p.second.toTuple());
           }
           std::sort(s_tuple.begin(), s_tuple.end());
+          s_tuple.erase(std::unique(s_tuple.begin(), s_tuple.end()), s_tuple.end());
+
           auto it = toNewState.find(s_tuple);
           if (it == toNewState.end()) {
             // When this state is new

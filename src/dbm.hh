@@ -115,8 +115,10 @@ struct DBM {
   void abstractize() {
     static constexpr Bounds infinity = Bounds(std::numeric_limits<double>::infinity(), false);
     for (auto it = value.data(); it < value.data() + value.size(); it++) {
-      if (*it >= M) {
+      if (*it > Bounds{M.first, true}) {
         *it = Bounds(infinity);
+      } else if (*it < Bounds{-M.first, false}) {
+        *it = Bounds(-M.first, false);
       }
     }
   }
