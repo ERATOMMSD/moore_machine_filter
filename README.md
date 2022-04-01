@@ -1,12 +1,14 @@
 Moore Machine Filter
 ====================
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
+
 An experimental implementation of Moore machine filter for timed and untimed pattern matching.
 
 Getting Started
 ------------
 
-### Prerequisites
+### Requirements
 
 * C++ compiler supporting C++14 and the corresponding libraries.
 * Boost (>= 1.59)
@@ -72,3 +74,8 @@ You can use [DOT language](http://www.graphviz.org/content/dot-language) to repr
 </tr>
 </tbody>
 </table>
+
+References
+-------------
+
+* Waga, Masaki, and Ichiro Hasuo. "Moore-machine filtering for timed and untimed pattern matching." IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 37.11 (2018): 2649-2660.
