@@ -1,16 +1,18 @@
+
 Moore Machine Filter
 ====================
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 
 An experimental implementation of Moore machine filter for timed and untimed pattern matching.
+This implementation is tested on Ubuntu (18.04 and 20.04) and macOS 10.15 Catalina.
 
 Getting Started
 ------------
 
 ### Requirements
 
-* C++ compiler supporting C++14 and the corresponding libraries.
+* C++ compiler supporting C++17 and the corresponding libraries.
 * Boost (>= 1.59)
 * Eigen
 * CMake

@@ -2,7 +2,7 @@ project(FILTERING_NFA CXX)
 
 cmake_minimum_required(VERSION 3.1)
 set(BUFFER_SIZE "10" CACHE STRING "Size of buffer in Moore machine")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14 -march=native -DBUFFER_SIZE=${BUFFER_SIZE}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -march=native -DBUFFER_SIZE=${BUFFER_SIZE}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-register")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-flto -O3 -DRELEASE")
@@ -33,7 +33,7 @@ target_include_directories(filt
   .
   ${CMAKE_CURRENT_BINARY_DIR})
 set_property(TARGET filt
-  PROPERTY CXX_STANDARD 14)
+  PROPERTY CXX_STANDARD 17)
 
 ## Config for Construct only version
 add_executable(construct_only
@@ -50,7 +50,7 @@ target_include_directories(construct_only
   .
   ${CMAKE_CURRENT_BINARY_DIR})
 set_property(TARGET construct_only
-  PROPERTY CXX_STANDARD 14)
+  PROPERTY CXX_STANDARD 17)
 
 ## Config for Test
 enable_testing()
@@ -64,6 +64,9 @@ add_executable(unit_test
   test/timed_moore_machine_test.cc
   test/dbm_test.cc
   test/bit_buffer_test.cc)
+
+set_property(TARGET unit_test
+  PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(unit_test
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

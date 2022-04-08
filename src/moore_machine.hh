@@ -9,13 +9,13 @@
 
 
 template<class T>
-static inline constexpr const T maskChar;
+inline constexpr const T maskChar;
 
 template<>
-static inline constexpr const unsigned char maskChar<unsigned char> = '_';
+inline constexpr const unsigned char maskChar<unsigned char> = '_';
 
 template<>
-static inline constexpr const std::pair<unsigned char, double> maskChar<std::pair<unsigned char, double>> = {'_', 0};
+inline constexpr const std::pair<unsigned char, double> maskChar<std::pair<unsigned char, double>> = {'_', 0};
 
 template<class T>
 constexpr T mask(T) {
