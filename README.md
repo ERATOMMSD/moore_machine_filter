@@ -8,6 +8,8 @@ Moore Machine Filter
 An experimental implementation of Moore machine filter for timed and untimed pattern matching.
 This implementation is tested on Ubuntu (18.04 and 20.04) and macOS 10.15 Catalina.
 
+[![asciicast](https://asciinema.org/a/483213.svg)](https://asciinema.org/a/483213)
+
 Getting Started
 ------------
 
