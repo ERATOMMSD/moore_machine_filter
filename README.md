@@ -2,6 +2,7 @@
 Moore Machine Filter
 ====================
 
+[![Boost.Test](https://github.com/ERATOMMSD/moore_machine_filter/actions/workflows/unit_test.yml/badge.svg)](https://github.com/ERATOMMSD/moore_machine_filter/actions/workflows/unit_test.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 
 An experimental implementation of Moore machine filter for timed and untimed pattern matching.
